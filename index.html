@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krishi Sakhi - AI Farming Assistant</title>
+    <!-- Chosen Palette: Lush Emerald & Warm Amber -->
+    <!-- Application Structure Plan: A single-page application (SPA) model controlled by JavaScript. The UI is divided into distinct 'pages' (Dashboard, Pest Detection, Schemes, Community) which are selectively displayed. A dashboard-centric approach is chosen for the landing view as it provides the most critical, at-a-glance information immediately, which is crucial for a farmer's daily workflow. Navigation is handled by a persistent sidebar, and key actions are available via a floating action button, ensuring easy access to core functionalities from any view. This structure prioritizes usability and quick information retrieval. -->
+    <!-- Visualization & Content Choices: Dashboard Stats (Weather, Farm Summary): Goal: Inform. Method: Styled HTML cards. Interaction: None. Justification: Clear display of vital stats. AI Suggestions/Tasks: Goal: Guide. Method: Styled lists. Interaction: None. Justification: Easy-to-scan items. Market Prices: Goal: Compare. Method: HTML list with trend icons. Justification: Simple and effective. Pest Detection: Goal: Diagnose. Method: File upload UI with dynamic text report. Interaction: User image upload. Justification: Core interactive feature. Schemes/Community: Goal: Organize. Method: Card-based layouts. Interaction: Navigation. Justification: User-friendly pattern for content lists. Financials Chart: Goal: Compare. Method: Bar chart via Chart.js. Interaction: Tooltips on hover. Justification: Visualizes income vs expenses clearly. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .dashboard-grid {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        .page, .signup-phase {
+            display: none;
+        }
+        .page.active, .signup-phase.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #059669; /* emerald-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .chat-bubble {
+            max-width: 80%;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        .toast {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .card-hover {
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .signup-bg {
+             background-color: #f0fdf4; /* emerald-50 */
+             background-image: radial-gradient(#a7f3d0 0.5px, transparent 0.5px);
+             background-size: 16px 16px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <!-- Signup Flow -->
+    <div id="signup-flow" class="min-h-screen flex items-center justify-center p-4 signup-bg">
+        <div class="w-full max-w-lg">
+            <!-- Phase 1: Contact Info -->
+            <div id="signup-phase-1" class="signup-phase active bg-white p-8 rounded-2xl shadow-2xl">
+                <h2 class="text-3xl font-bold text-center text-slate-800">Create your Account</h2>
+                <p class="text-center text-slate-500 mt-2 mb-8">Let's get started with some basic details.</p>
+                <div class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-700">Email ID</label>
+                        <input type="email" id="email" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="you@example.com">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
+                        <input type="tel" id="phone" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="+91 98765 43210">
+                    </div>
+                </div>
+                <button id="next-phase-1" class="w-full bg-emerald-600 text-white font-bold text-lg py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 mt-8 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-slate-300"></div>
+                    <span class="flex-shrink mx-4 text-slate-500">OR</span>
+                    <div class="flex-grow border-t border-slate-300"></div>
+                </div>
+                <button id="guest-login-btn" class="w-full bg-slate-500 text-white font-bold text-lg py-3 px-6 rounded-lg hover:bg-slate-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Use as Guest</button>
+            </div>
+
+            <!-- Phase 2: Farm Details -->
+            <div id="signup-phase-2" class="signup-phase bg-white p-8 rounded-2xl shadow-2xl">
+                 <h2 class="text-3xl font-bold text-center text-slate-800">Tell us about your Farm</h2>
+                 <p class="text-center text-slate-500 mt-2 mb-8">This helps us personalize your experience.</p>
+                 <div class="space-y-4">
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-slate-700">Location of Land</label>
+                        <input type="text" id="location" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., Thrissur, Kerala">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-grow">
+                             <label for="area" class="block text-sm font-medium text-slate-700">Area</label>
+                             <input type="number" id="area" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., 5">
+                        </div>
+                        <div>
+                            <select id="area-unit" class="h-[50px] mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                <option>Acre</option>
+                                <option>Hectare</option>
+                                <option>Cent</option>
+                                <option>Square Feet</option>
+                                <option>Square Meter</option>
+                            </select>
+                        </div>
+                    </div>
+                     <div>
+                        <label for="soil-type" class="block text-sm font-medium text-slate-700">Type of Soil</label>
+                        <select id="soil-type" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                            <option>Laterite Soil</option>
+                            <option>Alluvial Soil</option>
+                            <option>Red Soil</option>
+                            <option>Black Soil</option>
+                            <option>Forest Loam</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="main-crop" class="block text-sm font-medium text-slate-700">Main Crops (select one)</label>
+                         <select id="main-crop" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                            <option>Coconut</option>
+                            <option>Rubber</option>
+                            <option>Paddy (Rice)</option>
+                            <option>Pepper</option>
+                            <option>Cardamom</option>
+                            <option>Tea</option>
+                            <option>Banana</option>
+                         </select>
+                    </div>
+                     <div>
+                        <label for="irrigation" class="block text-sm font-medium text-slate-700">Irrigation System</label>
+                         <select id="irrigation" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                            <option>Rainwater Harvesting</option>
+                            <option>Borewell / Tube Well</option>
+                            <option>Canal</option>
+                            <option>River Lift</option>
+                            <option>Drip Irrigation</option>
+                         </select>
+                    </div>
+                 </div>
+                 <div class="mt-8 flex gap-4">
+                     <button id="prev-phase-2" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                     <button id="next-phase-2" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
+                 </div>
+            </div>
+
+            <!-- Phase 3: Experience -->
+            <div id="signup-phase-3" class="signup-phase bg-white p-8 rounded-2xl shadow-2xl">
+                 <h2 class="text-3xl font-bold text-center text-slate-800">One Last Step</h2>
+                 <p class="text-center text-slate-500 mt-2 mb-8">How would you describe your farming experience?</p>
+                 <div class="space-y-4">
+                    <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                        <span class="ml-4 font-medium text-slate-700">New Farmer (Beginner)</span>
+                    </label>
+                     <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
+                        <span class="ml-4 font-medium text-slate-700">Experienced (Moderate Knowledge)</span>
+                    </label>
+                     <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                        <span class="ml-4 font-medium text-slate-700">Expert (Know Everything)</span>
+                    </label>
+                 </div>
+                 <div class="mt-8 flex gap-4">
+                    <button id="prev-phase-3" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                    <button id="complete-signup" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Complete Sign Up</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="flex h-screen hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-20 lg:w-64 bg-white shadow-lg flex-col justify-between hidden md:flex transition-all duration-300">
+            <div>
+                <div class="p-4 lg:p-6 text-center">
+                    <h1 class="text-3xl font-extrabold text-emerald-700">K<span class="hidden lg:inline">rishi</span> S<span class="hidden lg:inline">akhi</span></h1>
+                </div>
+                <nav class="mt-6">
+                    <a href="#dashboard" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-layout text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Dashboard</span>
+                    </a>
+                    <a href="#financials" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-chart-bar text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Financials</span>
+                    </a>
+                    <a href="#pest-detection" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-bug text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Pest Detection</span>
+                    </a>
+                     <a href="#marketplace" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-storefront text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Marketplace</span>
+                    </a>
+                    <a href="#knowledge-hub" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-books text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Knowledge Hub</span>
+                    </a>
+                    <a href="#schemes" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-scroll text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Schemes</span>
+                    </a>
+                    <a href="#community" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-users-three text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Community</span>
+                    </a>
+                    <a href="#future-advancement" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                        <i class="ph-bold ph-rocket-launch text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Future Features</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="p-4 lg:p-6 border-t border-slate-200">
+                <a href="#" id="logout-btn" class="flex items-center justify-center lg:justify-start w-full py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
+                    <i class="ph-bold ph-sign-out text-3xl"></i>
+                    <span class="ml-4 font-semibold hidden lg:inline">Logout</span>
+                </a>
+                <p class="text-xs text-slate-400 text-center mt-4 hidden lg:block">SIH 2025 Demo</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-4 md:p-8">
+
+                <!-- Page: Dashboard -->
+                <div id="dashboard" class="page active">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Welcome back, Farmer!</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 dashboard-grid">
+                        
+                        <!-- Weather Card -->
+                        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
+                            <h3 class="font-bold text-lg mb-4 opacity-90">Weather Updates</h3>
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm opacity-80">Thrissur, Kerala</p>
+                                    <p class="text-6xl font-extrabold">29°C</p>
+                                    <p class="font-semibold">Humidity: 85%</p>
+                                </div>
+                                <i class="ph-fill ph-cloud-sun text-8xl opacity-80"></i>
+                            </div>
+                            <div class="mt-6 grid grid-cols-5 gap-2 text-center">
+                                <!-- Forecast items will be injected here by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Farm Condition Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                            <h3 class="font-bold text-slate-800 text-lg mb-4">Farm Condition</h3>
+                            <div class="space-y-4" id="farm-conditions-container">
+                                <!-- Farm condition items will be injected here by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Yield Prediction Card -->
+                        <div id="yield-prediction-card" class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                             <!-- Yield prediction content will be injected by JS -->
+                        </div>
+
+                        <!-- Market Prices Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                            <h3 class="font-bold text-slate-800 text-lg mb-4">Market Prices (Local Mandi)</h3>
+                            <ul id="market-prices-list" class="space-y-3">
+                                <!-- Market price items will be injected here by JS -->
+                            </ul>
+                        </div>
+                        
+                        <!-- AI Suggestions Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
+                            <h3 class="font-bold text-slate-800 text-lg mb-4">AI Suggestions of the Day</h3>
+                            <ul id="ai-suggestions-list" class="space-y-3">
+                                <!-- AI suggestion items will be injected here by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Upcoming Tasks Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
+                            <h3 class="font-bold text-slate-800 text-lg mb-4">Upcoming Tasks</h3>
+                            <ul id="upcoming-tasks-list" class="space-y-3">
+                                <!-- Upcoming task items will be injected here by JS -->
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Page: Financials -->
+                <div id="financials" class="page">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-4xl font-extrabold text-slate-800">Financials Dashboard</h2>
+                        <button id="log-transaction-btn" class="bg-emerald-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center">
+                            <i class="ph-bold ph-plus-circle mr-2"></i>Log Transaction
+                        </button>
+                    </div>
+                    <div id="financials-summary-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <!-- Financial summary cards will be injected by JS -->
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
+                            <h3 class="font-bold text-slate-800 text-lg mb-4">Income vs Expenses (Last 6 Months)</h3>
+                            <div class="chart-container">
+                                <canvas id="financialsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                                <h3 class="font-bold text-slate-800 text-lg mb-4">Expense Breakdown</h3>
+                                <div class="chart-container h-[250px] max-h-[250px]">
+                                    <canvas id="expenseBreakdownChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                                 <h3 class="font-bold text-slate-800 text-lg mb-4">Recent Transactions</h3>
+                                 <ul id="transactions-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
+                                    <!-- Transactions will be injected here by JS -->
+                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Pest Detection -->
+                <div id="pest-detection" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Pest & Disease Detection</h2>
+                    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+                        
+                        <div id="upload-section">
+                            <h3 class="text-xl font-bold text-center text-slate-800">Upload Crop Photo</h3>
+                            <div class="mt-4 border-2 border-dashed border-slate-300 rounded-lg p-10 text-center bg-slate-50 cursor-pointer" id="drop-zone">
+                                <input type="file" id="crop-photo-input" class="hidden" accept="image/*">
+                                <i class="ph-bold ph-upload-simple text-5xl text-emerald-500"></i>
+                                <p class="mt-2 text-slate-600">Click to upload or drag and drop</p>
+                                <p class="text-xs text-slate-400 mt-1">Supports JPG, PNG files</p>
+                            </div>
+                        </div>
+
+                        <div id="preview-section" class="hidden">
+                             <img id="image-preview" src="#" alt="Crop Preview" class="max-h-64 w-auto mx-auto rounded-lg shadow-md"/>
+                             <button id="analyze-button" class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                                <i class="ph-bold ph-magnifying-glass mr-2"></i>Analyze Image
+                            </button>
+                        </div>
+                        
+                        <div id="analysis-report" class="mt-6 hidden">
+                            <div id="loading-spinner" class="text-center py-4">
+                                <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+                                <p class="text-slate-600 mt-2">Analyzing image...</p>
+                            </div>
+                            <div id="report-content" class="hidden">
+                                <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center">AI Analysis Report</h3>
+                                <div class="space-y-4">
+                                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg">
+                                        <div class="flex items-center">
+                                            <i class="ph-bold ph-warning-circle text-2xl mr-3"></i>
+                                            <div>
+                                                <p class="font-bold">Disease Detected</p>
+                                                <p id="disease-name"></p>
+                                                <p id="disease-confidence" class="text-sm"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-slate-800">Recommended Action</h4>
+                                        <p id="recommended-action" class="text-slate-600 mt-1"></p>
+                                    </div>
+                                     <div class="bg-slate-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-slate-800">Preventative Measures</h4>
+                                        <p id="preventative-measures" class="text-slate-600 mt-1"></p>
+                                    </div>
+                                     <div class="bg-slate-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-slate-800">Organic Alternatives</h4>
+                                        <p id="organic-alternatives" class="text-slate-600 mt-1"></p>
+                                    </div>
+                                </div>
+                                <button id="download-report-btn" class="mt-6 w-full bg-slate-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-slate-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                                    <i class="ph-bold ph-download-simple mr-2"></i>Download Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Marketplace -->
+                <div id="marketplace" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Marketplace - Connect with Buyers</h2>
+                    <div id="buyers-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Buyer cards will be injected by JS -->
+                    </div>
+                </div>
+                
+                <!-- Page: Knowledge Hub -->
+                <div id="knowledge-hub" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Knowledge Hub</h2>
+                    <div id="articles-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Article cards will be injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Page: Schemes -->
+                <div id="schemes" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Government Schemes & Subsidies</h2>
+                    <div id="schemes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Scheme cards will be injected here by JS -->
+                    </div>
+                </div>
+
+                <!-- Page: Community -->
+                <div id="community" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Community Forum</h2>
+                    <div class="max-w-3xl mx-auto">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                            <textarea class="w-full border-slate-300 rounded-lg p-3 focus:ring-emerald-500 focus:border-emerald-500" rows="3" placeholder="Ask a question or share an update..."></textarea>
+                            <button class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-colors">Post to Community</button>
+                        </div>
+                        <div id="forum-posts" class="space-y-4">
+                            <!-- Forum posts will be injected here by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Future Advancement -->
+                <div id="future-advancement" class="page">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Future Advancements</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-3xl">Here's a roadmap of exciting features we're planning to introduce to make Krishi Sakhi even more powerful for the farming community.</p>
+                    <div id="future-features-list" class="space-y-6">
+                        <!-- Future feature cards will be injected here by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Quick Actions Floating Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <div id="quick-actions-menu" class="absolute bottom-16 right-0 mb-2 space-y-2 hidden">
+             <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="log">
+                <i class="ph-bold ph-clipboard-text text-xl text-emerald-600"></i>
+                <span class="ml-3 font-semibold">Log Activity</span>
+            </button>
+            <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="upload">
+                <i class="ph-bold ph-camera text-xl text-emerald-600"></i>
+                <span class="ml-3 font-semibold">Upload Photo</span>
+            </button>
+            <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="community">
+                <i class="ph-bold ph-chats-circle text-xl text-emerald-600"></i>
+                <span class="ml-3 font-semibold">Ask Community</span>
+            </button>
+        </div>
+        <button id="quick-actions-toggle" class="bg-emerald-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-emerald-700 transition-transform hover:scale-110">
+            <i class="ph-bold ph-plus"></i>
+        </button>
+    </div>
+    
+    <!-- Conversational AI Assistant -->
+    <div id="chat-widget" class="fixed bottom-24 right-6 hidden md:block z-50">
+        <div id="chat-window" class="w-80 h-96 bg-white rounded-2xl shadow-2xl flex flex-col hidden">
+            <div class="bg-emerald-600 text-white p-3 rounded-t-2xl">
+                <h4 class="font-semibold text-center">Krishi Sakhi Assistant</h4>
+            </div>
+            <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <div class="flex">
+                    <div class="bg-slate-200 p-3 rounded-lg chat-bubble">
+                        <p class="text-sm text-slate-800">Hello! How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 border-t border-slate-200 flex">
+                <input type="text" id="chat-input" placeholder="Ask me anything..." class="w-full border-slate-300 rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                <button id="chat-send" class="ml-2 bg-emerald-600 text-white px-4 rounded-lg hover:bg-emerald-700"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+            </div>
+        </div>
+        <button id="chat-toggle" class="bg-amber-500 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-amber-600 transition-transform hover:scale-110 mt-4">
+            <i class="ph-fill ph-chat-circle-dots"></i>
+        </button>
+    </div>
+
+    <!-- Log Activity Modal -->
+    <div id="log-activity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-[100]">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold text-slate-800 mb-4">Log Farm Activity</h3>
+            <p class="text-slate-600 mb-6">Keep your records updated for better AI advice.</p>
+            <textarea id="activity-log-input" class="w-full border-slate-300 rounded-lg p-3 focus:ring-emerald-500 focus:border-emerald-500" rows="4" placeholder="e.g., Irrigated 2 acres of paddy field."></textarea>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="modal-cancel" class="bg-slate-200 text-slate-700 font-semibold py-2 px-5 rounded-lg hover:bg-slate-300">Cancel</button>
+                <button id="modal-save" class="bg-emerald-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-emerald-700">Save Log</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 bg-emerald-600 text-white py-3 px-6 rounded-lg shadow-lg opacity-0 transform -translate-y-12 toast z-[200]">
+        <p id="toast-message" class="font-semibold"></p>
+    </div>
+
+    <!-- Scheme Details Modal -->
+    <div id="scheme-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[100]">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                 <h3 id="modal-scheme-title" class="text-3xl font-bold text-slate-800"></h3>
+                 <button id="modal-scheme-close" class="text-slate-500 hover:text-slate-800 text-2xl">
+                    <i class="ph-bold ph-x-circle"></i>
+                 </button>
+            </div>
+           
+            <div class="mt-6">
+                <h4 class="font-semibold text-lg text-slate-700">Scheme Details</h4>
+                <p id="modal-scheme-description" class="text-slate-600 mt-2"></p>
+            </div>
+
+            <div class="mt-6">
+                <h4 class="font-semibold text-lg text-slate-700">Required Documents</h4>
+                <ul id="modal-scheme-documents" class="list-disc list-inside mt-2 space-y-2 text-slate-600">
+                </ul>
+            </div>
+
+            <div id="modal-youtube-container" class="mt-6">
+                 <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Video</h4>
+                 <iframe id="modal-youtube-video" class="w-full aspect-video rounded-lg" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+
+            <div class="mt-8">
+                <a id="modal-scheme-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-emerald-600 text-white font-bold text-lg py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    Apply Now <i class="ph-bold ph-arrow-square-out ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Transaction Modal -->
+    <div id="log-transaction-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[100]">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-slate-800">Log a Transaction</h3>
+                <button id="close-transaction-modal" class="text-slate-500 hover:text-slate-800 text-2xl"><i class="ph-bold ph-x-circle"></i></button>
+            </div>
+            <form id="transaction-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Transaction Type</label>
+                    <div class="mt-1 grid grid-cols-2 gap-2 rounded-lg bg-slate-200 p-1">
+                        <label class="text-center py-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow font-semibold text-slate-700">
+                            <input type="radio" name="transaction-type" value="income" class="sr-only" checked> Income
+                        </label>
+                         <label class="text-center py-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow font-semibold text-slate-700">
+                            <input type="radio" name="transaction-type" value="expense" class="sr-only"> Expense
+                        </label>
+                    </div>
+                </div>
+                 <div>
+                    <label for="transaction-description" class="block text-sm font-medium text-slate-700">Description</label>
+                    <input type="text" id="transaction-description" class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm" required>
+                </div>
+                 <div>
+                    <label for="transaction-amount" class="block text-sm font-medium text-slate-700">Amount (₹)</label>
+                    <input type="number" id="transaction-amount" class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm" required>
+                </div>
+                <div id="category-wrapper">
+                     <label for="transaction-category" class="block text-sm font-medium text-slate-700">Category</label>
+                     <select id="transaction-category" class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm bg-white">
+                        <option>Fertilizers</option>
+                        <option>Seeds</option>
+                        <option>Labor</option>
+                        <option>Equipment</option>
+                        <option>Other</option>
+                     </select>
+                </div>
+                 <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-emerald-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-emerald-700">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- SIGNUP FLOW ---
+        const signupFlow = document.getElementById('signup-flow');
+        const mainApp = document.getElementById('main-app');
+        const signupPhases = document.querySelectorAll('.signup-phase');
+        let currentPhase = 1;
+
+        function showPhase(phaseNumber) {
+            signupPhases.forEach(p => p.classList.remove('active'));
+            const activePhase = document.getElementById(`signup-phase-${phaseNumber}`);
+            if(activePhase) activePhase.classList.add('active');
+        }
+
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-3rem)';
+            }, duration);
+        }
+
+        document.getElementById('next-phase-1').addEventListener('click', () => {
+            showToast('Authentication complete!');
+            setTimeout(() => {
+                currentPhase = 2;
+                showPhase(currentPhase);
+            }, 500);
+        });
+
+        document.getElementById('next-phase-2').addEventListener('click', () => {
+            currentPhase = 3;
+            showPhase(currentPhase);
+        });
+
+        document.getElementById('prev-phase-2').addEventListener('click', () => {
+            currentPhase = 1;
+            showPhase(currentPhase);
+        });
+
+         document.getElementById('prev-phase-3').addEventListener('click', () => {
+            currentPhase = 2;
+            showPhase(currentPhase);
+        });
+
+        document.getElementById('complete-signup').addEventListener('click', () => {
+            showToast('Authentication complete. Preparing your dashboard...', 2000);
+            setTimeout(() => {
+                signupFlow.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
+            }, 2000);
+        });
+        
+        const guestLoginBtn = document.getElementById('guest-login-btn');
+        guestLoginBtn.addEventListener('click', () => {
+            showToast('Entering as guest...', 1500);
+            setTimeout(() => {
+                signupFlow.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
+            }, 1500);
+        });
+
+
+        // --- MOCK DATA ---
+        const MOCK_DATA = {
+            weather: {
+                forecast: [
+                    { day: 'Today', icon: 'ph-fill ph-cloud-sun', high: 29, low: 24 },
+                    { day: 'Mon', icon: 'ph-fill ph-cloud-rain', high: 28, low: 23 },
+                    { day: 'Tue', icon: 'ph-fill ph-cloud-lightning', high: 27, low: 23 },
+                    { day: 'Wed', icon: 'ph-fill ph-wind', high: 29, low: 24 },
+                    { day: 'Thu', icon: 'ph-fill ph-sun', high: 31, low: 25 },
+                ]
+            },
+            farmConditions: [
+                { name: 'Soil Moisture', value: 72, color: 'bg-sky-500' },
+                { name: 'Nutrient Levels', value: 85, color: 'bg-lime-500' },
+                { name: 'Overall Farm Health', value: 91, color: 'bg-emerald-500' },
+            ],
+            yieldPrediction: { crop: 'Coconut', predicted: '8.5 tons/acre', confidence: '88%' },
+            marketPrices: [
+                { name: 'Coconut', price: '₹ 3,200/q', trend: 'up' },
+                { name: 'Rubber', price: '₹ 17,500/q', trend: 'down' },
+                { name: 'Banana', price: '₹ 2,800/q', trend: 'up' },
+                { name: 'Pepper', price: '₹ 51,000/q', trend: 'stable' },
+            ],
+            aiSuggestions: [
+                "Light rain expected. Consider delaying irrigation for paddy crops by 1 day.",
+                "Market price for coconuts is up by 5% in the local Mandi. Good day to sell.",
+                "Check for signs of yellow leaf disease on your areca nut plants.",
+            ],
+            upcomingTasks: [
+                { time: 'Today', task: 'Apply fertilizer to banana plants.' },
+                { time: 'Tomorrow', task: 'Pest scouting for coconut trees.' },
+                { time: 'In 3 days', task: 'Begin next irrigation cycle for paddy fields.' },
+            ],
+             pestDetectionReport: {
+                diseaseName: 'Leaf Blight (Minor Severity)',
+                confidence: 'Confidence: 85%',
+                recommendedAction: 'Apply a copper-based fungicide like Bordeaux mixture (1%) on affected areas. Ensure proper air circulation around plants and avoid overhead watering.',
+                preventativeMeasures: 'Maintain proper plant spacing for air circulation. Remove fallen leaves regularly. Use drip irrigation instead of sprinkler systems to keep leaves dry.',
+                organicAlternatives: 'Use neem oil spray (5ml per liter) or baking soda solution (1 tsp per liter) as organic alternatives. Spray during early morning or evening.'
+            },
+            schemes: [
+                { 
+                    title: 'Pradhan Mantri Kisan Samman Nidhi', 
+                    description: 'Provides income support to all landholding farmer families.', 
+                    eligibility: 'All Farmers',
+                    detailedDescription: 'A central government income support scheme. Provides ₹6,000 per annum to land-holding farmer families, in three instalments of ₹2,000 each. Aimed at helping farmers buy agricultural inputs and reduce dependency on informal credit.',
+                    documents: ['Aadhaar card', 'Proof of citizenship (if required)', 'Documents showing ownership of cultivable land', 'Bank account details (for DBT)'],
+                    applyLink: 'https://pmkisan.gov.in/',
+                    youtubeLink: 'https://www.youtube.com/embed/Uq9ktF-QycY'
+                },
+                { 
+                    title: 'Kisan Credit Card (KCC)', 
+                    description: 'Offers credit to farmers for their farming and other needs.', 
+                    eligibility: 'Farmers, Fishermen',
+                    detailedDescription: 'A credit scheme to provide farmers with timely, low-cost credit for agricultural and allied needs (crop cultivation, post-harvest expenses etc.). Helps reduce dependence on high interest informal credit sources.',
+                    documents: ['Completed KCC Application form', 'Two passport-size photographs', 'Identity proof (Aadhaar/Voter ID)', 'Address proof', 'Proof of landholding', 'Cropping pattern details'],
+                    applyLink: 'https://www.sbi.co.in/web/agri-rural/agriculture-banking/crop-finance/kisan-credit-card',
+                    youtubeLink: 'https://www.youtube.com/embed/70-qwhsDglI'
+                },
+                { 
+                    title: 'National Mission for Sustainable Agriculture', 
+                    description: 'Promotes sustainable agriculture practices.', 
+                    eligibility: 'Varies',
+                    detailedDescription: 'A mission under Ministry of Agriculture & Farmers Welfare, focused on enhancing agricultural productivity especially in rainfed areas. Key components: Integrated Farming, Water Use Efficiency, Soil Health Management, etc.',
+                    documents: ['Application / project proposal document', 'Bank account details for fund transfers', 'Aadhaar / identity proof', 'Soil health card and land mapping documents'],
+                    applyLink: 'https://nmsa.gov.in/default.aspx',
+                    youtubeLink: 'https://www.youtube.com/embed/UmS7oH-gRZ8'
+                },
+                { 
+                    title: 'Rashtriya Krishi Vikas Yojana (RKVY)', 
+                    description: 'Aims to achieve growth in the agriculture sector.', 
+                    eligibility: 'State Govt. Projects',
+                    detailedDescription: 'A scheme for holistic development of agriculture & allied sectors. It encourages states to plan and implement agricultural development programmes. Under RKVY-RAFTAAR, there is more focus on innovation and enhancing returns to farmers.',
+                    documents: ['Valid bank account', 'Aadhaar or other government-issued ID', 'Documents specific to the project being applied for'],
+                    applyLink: 'https://rkvy.nic.in/',
+                    youtubeLink: 'https://www.youtube.com/embed/qCTfIIU3t1M'
+                }
+            ],
+            forumPosts: [
+                { user: 'Ramesh K.', post: 'What is the best organic pesticide for controlling aphids on my vegetable patch?', replies: 3, likes: 8 },
+                { user: 'Sita Menon', post: 'Sharing a photo of my healthy tomato harvest! Thanks to the tips from this app.', replies: 5, likes: 22 },
+                { user: 'Anil Varma', post: 'Urgent help needed! My rubber trees are showing signs of leaf fall disease. What should I do?', replies: 7, likes: 15 },
+            ],
+            financials: {
+                summary: { income: 50000, expenses: 22000, profit: 28000 },
+                chartData: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    income: [12000, 19000, 3000, 5000, 2000, 9000],
+                    expenses: [7000, 8000, 2000, 3000, 1500, 4500]
+                },
+                expenseBreakdown: {
+                    labels: ['Fertilizers', 'Seeds', 'Labor', 'Equipment', 'Other'],
+                    data: [8000, 5500, 4000, 3000, 1500]
+                },
+                transactions: [
+                    { type: 'income', description: 'Sold 10 quintals of Coconut', amount: 32000, date: '2025-09-15' },
+                    { type: 'expense', description: 'Purchased NPK Fertilizer', amount: 8000, date: '2025-09-12', category: 'Fertilizers' },
+                    { type: 'expense', description: 'Tractor rental for ploughing', amount: 3000, date: '2025-09-10', category: 'Equipment' },
+                    { type: 'income', description: 'Sold Bananas (local market)', amount: 18000, date: '2025-09-05' },
+                    { type: 'expense', description: 'Hired labor for weeding', amount: 4000, date: '2025-09-02', category: 'Labor' },
+                ]
+            },
+            futureAdvancements: [
+                {
+                    title: 'AI Crop Health Monitoring',
+                    description: 'Utilizes Satellite NDVI data and advanced image scanning to provide a macro and micro view of your farm\'s health, detecting stress points before they become visible to the naked eye.',
+                    details: [
+                        'Regular satellite imagery analysis for large-scale monitoring.',
+                        'Drone or phone camera integration for high-resolution scanning.',
+                        'Early detection of nutrient deficiencies and water stress.'
+                    ]
+                },
+                {
+                    title: 'Digital Payments & Farmer Wallet',
+                    description: 'A secure, integrated digital wallet for all farm-related transactions. Receive payments from buyers, pay for supplies, and manage subsidies directly within the app.',
+                    details: [
+                        'Seamless peer-to-peer and business transactions.',
+                        'Easy tracking of all income and expenses.',
+                        'Direct subsidy deposits from government schemes.'
+                    ]
+                },
+                {
+                    title: 'Crop Insurance & Loan Support',
+                    description: 'Get recommendations for the best crop insurance policies based on your farm data and access simplified loan application processes through partner institutions.',
+                    details: [
+                        'Personalized insurance plan suggestions.',
+                        'EMI and premium calculators.',
+                        'Streamlined digital application for loans.'
+                    ]
+                },
+                {
+                    title: 'Predictive Analytics & Yield Estimation',
+                    description: 'Leveraging historical data and AI models to forecast crop yields with high accuracy, helping you make better decisions for storage and market sales.',
+                    details: [
+                        'AI-powered yield forecasts for your specific crops.',
+                        'Analysis of weather impact on future yield.',
+                        'Informed planning for harvesting and sales.'
+                    ]
+                },
+                {
+                    title: 'Pest/Disease Early Warning Network',
+                    description: 'A community-powered alert system. When farmers in your region report a pest, our AI analyzes the pattern and sends out early warnings to prevent widespread outbreaks.',
+                    details: [
+                        'Farmers in the same area share pest alerts.',
+                        'AI detects outbreak patterns and sends region-wide warnings.',
+                        'Proactive measures to protect your crops.'
+                    ]
+                },
+                 {
+                    title: 'Impact Dashboard & Offline Mode',
+                    description: 'An advanced dashboard to track profit vs. expense, yield trends, and generate exportable reports for documentation. All essential features will be available in offline or low-data modes.',
+                    details: [
+                        'Visualize your farm\'s financial health over time.',
+                        'Generate PDF reports for loans or records.',
+                        'Access critical advisories without an active internet connection.'
+                    ]
+                }
+            ],
+            buyers: [
+                { name: 'Kerala Spices Co.', location: 'Kochi', interestedIn: ['Pepper', 'Cardamom'], rating: 4.8 },
+                { name: 'Fresh Produce Exporters', location: 'Trivandrum', interestedIn: ['Banana', 'Pineapple'], rating: 4.5 },
+                { name: 'South Coconut Traders', location: 'Alappuzha', interestedIn: ['Coconut', 'Copra'], rating: 4.7 },
+            ],
+            knowledgeArticles: [
+                { title: 'Advanced Irrigation Techniques for Paddy Fields', category: 'Water Management', readTime: '8 min' },
+                { title: 'Organic Pest Control for Common Vegetables', category: 'Pest Control', readTime: '12 min' },
+                { title: 'Understanding Soil Health and Nutrients', category: 'Soil Health', readTime: '15 min' },
+            ]
+        };
+
+        let financialsChart = null;
+        let expenseChart = null;
+
+        // --- RENDER FUNCTIONS ---
+        function renderWeatherForecast() {
+            const container = document.querySelector('#dashboard .grid.grid-cols-5');
+            container.innerHTML = MOCK_DATA.weather.forecast.map(item => `
+                <div class="text-center">
+                    <p class="font-semibold">${item.day}</p>
+                    <i class="${item.icon} text-4xl my-2"></i>
+                    <p class="text-sm">${item.high}°/${item.low}°</p>
+                </div>
+            `).join('');
+        }
+
+        function renderFarmConditions() {
+            const container = document.getElementById('farm-conditions-container');
+            container.innerHTML = MOCK_DATA.farmConditions.map(item => `
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-sm font-medium text-slate-600">${item.name}</p>
+                        <p class="text-sm font-bold text-slate-800">${item.value}%</p>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div class="${item.color} h-2.5 rounded-full" style="width: ${item.value}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderYieldPrediction() {
+            const container = document.getElementById('yield-prediction-card');
+            const data = MOCK_DATA.yieldPrediction;
+            container.innerHTML = `
+                <h3 class="font-bold text-slate-800 text-lg mb-2">Yield Prediction</h3>
+                <p class="text-sm text-slate-500 mb-4">${data.crop}</p>
+                <p class="text-5xl font-extrabold text-emerald-600">${data.predicted}</p>
+                <p class="text-sm text-slate-600 mt-2 font-semibold">Confidence: <span class="text-green-600">${data.confidence}</span></p>
+            `;
+        }
+
+        function renderMarketPrices() {
+            const container = document.getElementById('market-prices-list');
+            const trendIcons = {
+                up: '<i class="ph-bold ph-arrow-up text-green-500"></i>',
+                down: '<i class="ph-bold ph-arrow-down text-red-500"></i>',
+                stable: '<i class="ph-bold ph-minus text-slate-500"></i>'
+            };
+            container.innerHTML = MOCK_DATA.marketPrices.map(item => `
+                <li class="flex justify-between items-center">
+                    <span class="font-medium text-slate-700">${item.name}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-slate-800">${item.price}</span>
+                        ${trendIcons[item.trend]}
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function renderAiSuggestions() {
+            const container = document.getElementById('ai-suggestions-list');
+            container.innerHTML = MOCK_DATA.aiSuggestions.map(item => `
+                <li class="flex items-start">
+                    <i class="ph-fill ph-sparkle text-amber-500 text-xl mt-1"></i>
+                    <p class="ml-3 text-slate-600">${item}</p>
+                </li>
+            `).join('');
+        }
+
+        function renderUpcomingTasks() {
+            const container = document.getElementById('upcoming-tasks-list');
+            container.innerHTML = MOCK_DATA.upcomingTasks.map(item => `
+                <li class="flex items-center">
+                    <div class="bg-emerald-100 text-emerald-700 font-bold text-sm rounded-md px-3 py-1">${item.time}</div>
+                    <p class="ml-4 text-slate-700">${item.task}</p>
+                </li>
+            `).join('');
+        }
+        
+        function renderFinancials() {
+            const summaryContainer = document.getElementById('financials-summary-cards');
+            const summary = MOCK_DATA.financials.summary;
+            const formatCurrency = (value) => `₹${new Intl.NumberFormat('en-IN').format(value)}`;
+            
+            summaryContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                    <h4 class="text-slate-500 font-semibold">Total Income</h4>
+                    <p class="text-4xl font-extrabold text-green-600 mt-2">${formatCurrency(summary.income)}</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                    <h4 class="text-slate-500 font-semibold">Total Expenses</h4>
+                    <p class="text-4xl font-extrabold text-red-600 mt-2">${formatCurrency(summary.expenses)}</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                    <h4 class="text-slate-500 font-semibold">Net Profit</h4>
+                    <p class="text-4xl font-extrabold text-emerald-700 mt-2">${formatCurrency(summary.profit)}</p>
+                </div>
+            `;
+            
+            const ctx = document.getElementById('financialsChart').getContext('2d');
+            if (financialsChart) {
+                financialsChart.destroy();
+            }
+            financialsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: MOCK_DATA.financials.chartData.labels,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: MOCK_DATA.financials.chartData.income,
+                            backgroundColor: 'rgba(5, 150, 105, 0.7)',
+                            borderColor: 'rgba(5, 150, 105, 1)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Expenses',
+                            data: MOCK_DATA.financials.chartData.expenses,
+                            backgroundColor: 'rgba(220, 38, 38, 0.6)',
+                            borderColor: 'rgba(220, 38, 38, 1)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            renderExpenseChart();
+            renderTransactionsList();
+        }
+        
+        function renderExpenseChart() {
+            const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
+            const data = MOCK_DATA.financials.expenseBreakdown;
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+            expenseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Expense Breakdown',
+                        data: data.data,
+                        backgroundColor: [
+                            '#10b981', // emerald-500
+                            '#34d399', // emerald-400
+                            '#6ee7b7', // emerald-300
+                            '#a7f3d0', // emerald-200
+                            '#d1fae5'  // emerald-100
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTransactionsList() {
+            const container = document.getElementById('transactions-list');
+            const formatCurrency = (value) => `₹${new Intl.NumberFormat('en-IN').format(value)}`;
+            container.innerHTML = MOCK_DATA.financials.transactions.map(item => `
+                <li class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="p-2 rounded-full ${item.type === 'income' ? 'bg-green-100' : 'bg-red-100'}">
+                            <i class="ph-bold ${item.type === 'income' ? 'ph-arrow-up text-green-600' : 'ph-arrow-down text-red-600'}"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="font-semibold text-slate-800">${item.description}</p>
+                            <p class="text-sm text-slate-500">${item.date}</p>
+                        </div>
+                    </div>
+                    <p class="font-bold ${item.type === 'income' ? 'text-green-600' : 'text-red-600'}">
+                        ${item.type === 'income' ? '+' : '-'}${formatCurrency(item.amount)}
+                    </p>
+                </li>
+            `).join('');
+        }
+        
+        function renderFutureAdvancements() {
+            const container = document.getElementById('future-features-list');
+            container.innerHTML = MOCK_DATA.futureAdvancements.map(item => `
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                     <h3 class="text-2xl font-bold text-emerald-700">${item.title}</h3>
+                     <p class="text-slate-600 mt-2">${item.description}</p>
+                     <ul class="list-disc list-inside mt-4 space-y-1 text-slate-500">
+                        ${item.details.map(detail => `<li>${detail}</li>`).join('')}
+                     </ul>
+                </div>
+            `).join('');
+        }
+
+        function renderMarketplace() {
+            const container = document.getElementById('buyers-list');
+            container.innerHTML = MOCK_DATA.buyers.map(buyer => `
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+                    <div class="flex justify-between items-start">
+                         <h3 class="font-bold text-slate-800 text-lg">${buyer.name}</h3>
+                         <div class="flex items-center bg-amber-100 text-amber-800 text-sm font-bold px-2.5 py-1 rounded-full">
+                            <i class="ph-fill ph-star text-amber-500"></i>
+                            <span class="ml-1">${buyer.rating}</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-500">${buyer.location}</p>
+                    <div class="mt-4">
+                        <p class="text-sm font-semibold text-slate-700">Interested in:</p>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                        ${buyer.interestedIn.map(crop => `<span class="bg-slate-200 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-full">${crop}</span>`).join('')}
+                        </div>
+                    </div>
+                    <button class="mt-6 w-full bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all">Contact Buyer</button>
+                </div>
+            `).join('');
+        }
+        
+        function renderKnowledgeHub() {
+             const container = document.getElementById('articles-list');
+             container.innerHTML = MOCK_DATA.knowledgeArticles.map(article => `
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
+                    <div class="bg-gradient-to-r from-amber-400 to-yellow-400 h-28"></div>
+                    <div class="p-6">
+                        <p class="text-sm text-amber-700 font-semibold">${article.category}</p>
+                        <h3 class="font-bold text-slate-800 text-lg mt-2">${article.title}</h3>
+                        <div class="flex justify-between items-center mt-4 text-sm text-slate-500">
+                            <span>${article.readTime} read</span>
+                            <a href="#" class="font-semibold text-emerald-600 hover:underline">Read More <i class="ph-bold ph-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+             `).join('');
+        }
+
+        function renderSchemes() {
+            const container = document.getElementById('schemes-list');
+            container.innerHTML = MOCK_DATA.schemes.map((item, index) => `
+                <div class="bg-white p-6 rounded-2xl shadow-lg card-hover flex flex-col justify-between">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${item.eligibility}</span>
+                        <h3 class="font-bold text-slate-800 text-lg mt-3">${item.title}</h3>
+                        <p class="text-slate-600 mt-2 text-sm">${item.description}</p>
+                    </div>
+                    <button class="learn-more-btn mt-4 text-emerald-600 font-semibold hover:underline text-left self-start" data-scheme-id="${index}">
+                        Learn More <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        function renderForumPosts() {
+            const container = document.getElementById('forum-posts');
+            container.innerHTML = MOCK_DATA.forumPosts.map(item => `
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <p class="font-semibold text-slate-800">${item.user}</p>
+                    <p class="text-slate-700 my-2">${item.post}</p>
+                    <div class="flex items-center text-sm text-slate-500 space-x-4 mt-4">
+                        <button class="hover:text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-chat-circle-dots"></i> ${item.replies} Replies</button>
+                        <button class="hover:text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-heart"></i> ${item.likes} Likes</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- NAVIGATION ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+
+        function changePage(hash) {
+            pages.forEach(page => page.classList.remove('active'));
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            const activePage = document.querySelector(hash);
+            const activeLink = document.querySelector(`.nav-link[href="${hash}"]`);
+
+            if (activePage) activePage.classList.add('active');
+            if (activeLink) activeLink.classList.add('active');
+
+            if (hash === '#financials') {
+                renderFinancials();
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = e.currentTarget.getAttribute('href');
+                window.location.hash = hash;
+            });
+        });
+
+        window.addEventListener('hashchange', () => {
+            changePage(window.location.hash || '#dashboard');
+        });
+        
+        // --- PEST DETECTION ---
+        const dropZone = document.getElementById('drop-zone');
+        const uploadSection = document.getElementById('upload-section');
+        const previewSection = document.getElementById('preview-section');
+        const fileInput = document.getElementById('crop-photo-input');
+        const imagePreview = document.getElementById('image-preview');
+        const analyzeButton = document.getElementById('analyze-button');
+        const analysisReport = document.getElementById('analysis-report');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const reportContent = document.getElementById('report-content');
+        const downloadReportBtn = document.getElementById('download-report-btn');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => e.preventDefault());
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect({ target: fileInput });
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.setAttribute('src', e.target.result);
+                    uploadSection.classList.add('hidden');
+                    previewSection.classList.remove('hidden');
+                    analysisReport.classList.add('hidden');
+                    reportContent.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        analyzeButton.addEventListener('click', () => {
+            previewSection.classList.add('hidden');
+            analysisReport.classList.remove('hidden');
+            loadingSpinner.classList.remove('hidden');
+
+            setTimeout(() => {
+                const reportData = MOCK_DATA.pestDetectionReport;
+                document.getElementById('disease-name').textContent = reportData.diseaseName;
+                document.getElementById('disease-confidence').textContent = reportData.confidence;
+                document.getElementById('recommended-action').textContent = reportData.recommendedAction;
+                document.getElementById('preventative-measures').textContent = reportData.preventativeMeasures;
+                document.getElementById('organic-alternatives').textContent = reportData.organicAlternatives;
+                
+                loadingSpinner.classList.add('hidden');
+                reportContent.classList.remove('hidden');
+            }, 2500);
+        });
+
+        function downloadReport() {
+            const reportData = MOCK_DATA.pestDetectionReport;
+            let reportText = `
+KRISHI SAKHI - PEST & DISEASE ANALYSIS REPORT
+============================================
+
+Disease Detected: ${reportData.diseaseName}
+Confidence: ${reportData.confidence.split(': ')[1]}
+
+Recommended Action:
+${reportData.recommendedAction}
+
+Preventative Measures:
+${reportData.preventativeMeasures}
+
+Organic Alternatives:
+${reportData.organicAlternatives}
+            `;
+            
+            const blob = new Blob([reportText.trim()], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'KrishiSakhi_PestReport.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        downloadReportBtn.addEventListener('click', downloadReport);
+
+
+        // --- QUICK ACTIONS ---
+        const qaToggle = document.getElementById('quick-actions-toggle');
+        const qaMenu = document.getElementById('quick-actions-menu');
+        const qaItems = document.querySelectorAll('.quick-action-item');
+        const logModal = document.getElementById('log-activity-modal');
+
+        qaToggle.addEventListener('click', () => {
+            qaMenu.classList.toggle('hidden');
+            qaToggle.classList.toggle('rotate-45');
+        });
+        
+        qaItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                if (action === 'log') {
+                    logModal.classList.remove('hidden');
+                } else if (action === 'upload') {
+                    window.location.hash = '#pest-detection';
+                } else if (action === 'community') {
+                    window.location.hash = '#community';
+                }
+                qaMenu.classList.add('hidden');
+                qaToggle.classList.remove('rotate-45');
+            });
+        });
+
+        // --- MODAL ---
+        document.getElementById('modal-cancel').addEventListener('click', () => logModal.classList.add('hidden'));
+        document.getElementById('modal-save').addEventListener('click', () => {
+            // Logic to save activity would go here
+            console.log('Activity logged:', document.getElementById('activity-log-input').value);
+            document.getElementById('activity-log-input').value = '';
+            logModal.classList.add('hidden');
+            // Show a success message if needed
+        });
+        
+        // --- SCHEME DETAILS MODAL ---
+        const schemeModal = document.getElementById('scheme-details-modal');
+        const schemesListContainer = document.getElementById('schemes-list');
+
+        function openSchemeModal(schemeData) {
+            document.getElementById('modal-scheme-title').textContent = schemeData.title;
+            document.getElementById('modal-scheme-description').textContent = schemeData.detailedDescription;
+            
+            const docList = document.getElementById('modal-scheme-documents');
+            docList.innerHTML = schemeData.documents.map(doc => `<li>${doc}</li>`).join('');
+
+            const applyLink = document.getElementById('modal-scheme-apply-link');
+            applyLink.href = schemeData.applyLink;
+            
+            const youtubeContainer = document.getElementById('modal-youtube-container');
+            const youtubeVideo = document.getElementById('modal-youtube-video');
+            if (schemeData.youtubeLink) {
+                youtubeVideo.src = schemeData.youtubeLink;
+                youtubeContainer.classList.remove('hidden');
+            } else {
+                youtubeContainer.classList.add('hidden');
+            }
+
+            schemeModal.classList.remove('hidden');
+        }
+
+        function closeSchemeModal() {
+            const youtubeVideo = document.getElementById('modal-youtube-video');
+            schemeModal.classList.add('hidden');
+            youtubeVideo.src = ""; // Stop video playback when modal is closed
+        }
+
+        // Event delegation for dynamically created buttons
+        schemesListContainer.addEventListener('click', function(e) {
+            const learnMoreButton = e.target.closest('.learn-more-btn');
+            if (learnMoreButton) {
+                const schemeId = learnMoreButton.getAttribute('data-scheme-id');
+                const schemeData = MOCK_DATA.schemes[schemeId];
+                if (schemeData) {
+                    openSchemeModal(schemeData);
+                }
+            }
+        });
+
+        document.getElementById('modal-scheme-close').addEventListener('click', closeSchemeModal);
+
+        // Close modal if user clicks outside of the content area
+        schemeModal.addEventListener('click', function(e) {
+            if (e.target === schemeModal) {
+                closeSchemeModal();
+            }
+        });
+        
+        // --- TRANSACTION MODAL ---
+        const logTransactionBtn = document.getElementById('log-transaction-btn');
+        const transactionModal = document.getElementById('log-transaction-modal');
+        const closeTransactionModalBtn = document.getElementById('close-transaction-modal');
+        const transactionForm = document.getElementById('transaction-form');
+        const categoryWrapper = document.getElementById('category-wrapper');
+
+        logTransactionBtn.addEventListener('click', () => transactionModal.classList.remove('hidden'));
+        closeTransactionModalBtn.addEventListener('click', () => transactionModal.classList.add('hidden'));
+        transactionModal.addEventListener('click', (e) => {
+            if (e.target === transactionModal) {
+                transactionModal.classList.add('hidden');
+            }
+        });
+
+        transactionForm.addEventListener('change', (e) => {
+            if (e.target.name === 'transaction-type') {
+                categoryWrapper.style.display = e.target.value === 'expense' ? 'block' : 'none';
+            }
+        });
+
+        transactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newTransaction = {
+                type: transactionForm['transaction-type'].value,
+                description: document.getElementById('transaction-description').value,
+                amount: parseFloat(document.getElementById('transaction-amount').value),
+                date: new Date().toISOString().split('T')[0], // Today's date
+                category: document.getElementById('transaction-category').value
+            };
+            
+            console.log('New Transaction:', newTransaction);
+            MOCK_DATA.financials.transactions.unshift(newTransaction);
+            renderTransactionsList();
+
+            transactionForm.reset();
+            categoryWrapper.style.display = 'block';
+            transactionModal.classList.add('hidden');
+            showToast('Transaction logged successfully!');
+        });
+
+
+        // --- CHATBOT ---
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatHistory = document.getElementById('chat-history');
+
+        chatToggle.addEventListener('click', () => {
+            chatWindow.classList.toggle('hidden');
+        });
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'p-3 rounded-lg chat-bubble';
+
+            if (sender === 'user') {
+                messageDiv.classList.add('justify-end');
+                bubble.classList.add('bg-emerald-600', 'text-white');
+            } else {
+                bubble.classList.add('bg-slate-200');
+            }
+
+            const p = document.createElement('p');
+            p.className = 'text-sm';
+            p.textContent = text;
+
+            bubble.appendChild(p);
+            messageDiv.appendChild(bubble);
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function handleSendMessage() {
+            const userMessage = chatInput.value.trim();
+            if (userMessage) {
+                addMessage(userMessage, 'user');
+                chatInput.value = '';
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const aiResponse = "Considering your soil data and the current growth stage, a fertilizer with a higher potassium ratio (NPK 6-6-12) is recommended. Would you like to see a list of products?";
+                    addMessage(aiResponse, 'ai');
+                }, 1500);
+            }
+        }
+        
+        chatSend.addEventListener('click', handleSendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSendMessage();
+            }
+        });
+
+        // --- LOGOUT ---
+        const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            showToast('Logging out...', 1500);
+
+            setTimeout(() => {
+                mainApp.classList.add('hidden');
+                signupFlow.classList.remove('hidden');
+                showPhase(1);
+                window.location.hash = '';
+            }, 1500);
+        });
+
+
+        // --- INITIALIZE APP ---
+        function init() {
+            renderWeatherForecast();
+            renderFarmConditions();
+            renderYieldPrediction();
+            renderMarketPrices();
+            renderAiSuggestions();
+            renderUpcomingTasks();
+            renderSchemes();
+            renderForumPosts();
+            renderMarketplace();
+            renderKnowledgeHub();
+            renderFutureAdvancements();
+            changePage(window.location.hash || '#dashboard');
+        }
+
+        init();
+    });
+    </script>
+</body>
+</html>
+

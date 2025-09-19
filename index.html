@@ -185,56 +185,66 @@
     </div>
 
     <!-- Main App -->
-    <div id="main-app" class="flex h-screen hidden">
+    <div id="main-app" class="hidden md:flex">
+        <!-- Overlay for mobile nav -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
         <!-- Sidebar Navigation -->
-        <aside class="w-20 lg:w-64 bg-white shadow-lg flex-col justify-between hidden md:flex transition-all duration-300">
+        <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white shadow-lg flex-col flex transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative md:w-20 lg:w-64">
             <div>
                 <div class="p-4 lg:p-6 text-center">
-                    <h1 class="text-3xl font-extrabold text-emerald-700">K<span class="hidden lg:inline">rishi</span> S<span class="hidden lg:inline">akhi</span></h1>
+                    <h1 class="text-3xl font-extrabold text-emerald-700">K<span class="md:hidden lg:inline">rishi</span> S<span class="md:hidden lg:inline">akhi</span></h1>
                 </div>
                 <nav class="mt-6">
                     <a href="#dashboard" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-layout text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Dashboard</span>
+                        <i class="ph-bold ph-layout text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Dashboard</span>
                     </a>
                     <a href="#financials" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-chart-bar text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Financials</span>
+                        <i class="ph-bold ph-chart-bar text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Financials</span>
                     </a>
                     <a href="#pest-detection" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-bug text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Pest Detection</span>
+                        <i class="ph-bold ph-bug text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Pest Detection</span>
                     </a>
                      <a href="#marketplace" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-storefront text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Marketplace</span>
+                        <i class="ph-bold ph-storefront text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Marketplace</span>
                     </a>
                     <a href="#knowledge-hub" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-books text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Knowledge Hub</span>
+                        <i class="ph-bold ph-books text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Knowledge Hub</span>
                     </a>
                     <a href="#schemes" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-scroll text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Schemes</span>
+                        <i class="ph-bold ph-scroll text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Schemes</span>
                     </a>
                     <a href="#community" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-users-three text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Community</span>
+                        <i class="ph-bold ph-users-three text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Community</span>
                     </a>
                     <a href="#future-advancement" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
-                        <i class="ph-bold ph-rocket-launch text-3xl"></i><span class="ml-4 font-semibold hidden lg:inline">Future Features</span>
+                        <i class="ph-bold ph-rocket-launch text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Future Features</span>
                     </a>
                 </nav>
             </div>
-            <div class="p-4 lg:p-6 border-t border-slate-200">
+            <div class="p-4 lg:p-6 mt-auto border-t border-slate-200">
                 <a href="#" id="logout-btn" class="flex items-center justify-center lg:justify-start w-full py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
                     <i class="ph-bold ph-sign-out text-3xl"></i>
-                    <span class="ml-4 font-semibold hidden lg:inline">Logout</span>
+                    <span class="ml-4 font-semibold md:hidden lg:inline">Logout</span>
                 </a>
-                <p class="text-xs text-slate-400 text-center mt-4 hidden lg:block">SIH 2025 Demo</p>
+                <p class="text-xs text-slate-400 text-center mt-4 md:hidden lg:block">SIH 2025 Demo</p>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto">
+            <!-- Mobile Header -->
+            <header class="md:hidden bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-20">
+                <h1 class="text-2xl font-extrabold text-emerald-700">Krishi Sakhi</h1>
+                <button id="hamburger-btn" class="text-3xl text-slate-700">
+                    <i class="ph-bold ph-list"></i>
+                </button>
+            </header>
             <div class="p-4 md:p-8">
 
                 <!-- Page: Dashboard -->
                 <div id="dashboard" class="page active">
-                    <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Welcome back, Farmer!</h2>
+                    <h2 id="dashboard-greeting" class="text-4xl font-extrabold text-slate-800 mb-6">Welcome back, Farmer!</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 dashboard-grid">
                         
                         <!-- Weather Card -->
@@ -583,11 +593,14 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        let currentUser = 'Farmer';
         
         // --- SIGNUP FLOW ---
         const signupFlow = document.getElementById('signup-flow');
         const mainApp = document.getElementById('main-app');
         const signupPhases = document.querySelectorAll('.signup-phase');
+        const emailInput = document.getElementById('email');
+
         let currentPhase = 1;
 
         function showPhase(phaseNumber) {
@@ -606,6 +619,20 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(-3rem)';
             }, duration);
+        }
+
+        function updateDashboardGreeting() {
+            const greetingElement = document.getElementById('dashboard-greeting');
+            if (greetingElement) {
+                greetingElement.textContent = `Welcome back, ${currentUser}!`;
+            }
+        }
+        
+        function transitionToApp() {
+            signupFlow.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
+            updateDashboardGreeting();
         }
 
         document.getElementById('next-phase-1').addEventListener('click', () => {
@@ -632,22 +659,21 @@
         });
 
         document.getElementById('complete-signup').addEventListener('click', () => {
+            const userEmail = emailInput.value.trim();
+            if (userEmail && userEmail.includes('@')) {
+                 currentUser = userEmail.split('@')[0];
+            } else {
+                currentUser = 'User';
+            }
             showToast('Authentication complete. Preparing your dashboard...', 2000);
-            setTimeout(() => {
-                signupFlow.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
-            }, 2000);
+            setTimeout(transitionToApp, 2000);
         });
         
         const guestLoginBtn = document.getElementById('guest-login-btn');
         guestLoginBtn.addEventListener('click', () => {
+            currentUser = 'Guest';
             showToast('Entering as guest...', 1500);
-            setTimeout(() => {
-                signupFlow.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
-            }, 1500);
+            setTimeout(transitionToApp, 1500);
         });
 
 
@@ -1116,6 +1142,17 @@
         // --- NAVIGATION ---
         const navLinks = document.querySelectorAll('.nav-link');
         const pages = document.querySelectorAll('.page');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
 
         function changePage(hash) {
             pages.forEach(page => page.classList.remove('active'));
@@ -1129,6 +1166,11 @@
 
             if (hash === '#financials') {
                 renderFinancials();
+            }
+             // Close sidebar on mobile after navigation
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
             }
         }
 
@@ -1429,6 +1471,10 @@ ${reportData.organicAlternatives}
             showToast('Logging out...', 1500);
 
             setTimeout(() => {
+                // Reset user to default
+                currentUser = 'Farmer';
+                updateDashboardGreeting();
+
                 mainApp.classList.add('hidden');
                 signupFlow.classList.remove('hidden');
                 showPhase(1);
@@ -1458,4 +1504,5 @@ ${reportData.organicAlternatives}
     </script>
 </body>
 </html>
+
 

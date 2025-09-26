@@ -70,7 +70,7 @@
 <body class="bg-slate-100">
 
     <!-- Signup Flow -->
-    <div id="signup-flow" class="min-h-screen flex items-center justify-center p-4 signup-bg">
+    <div id="signup-flow" class="fixed inset-0 z-50 flex items-center justify-center p-4 signup-bg">
         <div class="w-full max-w-lg">
             <!-- Phase 1: Contact Info -->
             <div id="signup-phase-1" class="signup-phase active bg-white p-8 rounded-2xl shadow-2xl">
@@ -1169,8 +1169,9 @@
             }
              // Close sidebar on mobile after navigation
             if (window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
+                if(!sidebar.classList.contains('-translate-x-full')) {
+                    toggleSidebar();
+                }
             }
         }
 
@@ -1504,5 +1505,4 @@ ${reportData.organicAlternatives}
     </script>
 </body>
 </html>
-
 

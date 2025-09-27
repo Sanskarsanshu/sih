@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Krishi Sakhi | AI Farming Assistant</title>
-    <!-- Chosen Palette: Lush Emerald & Warm Amber -->
-    <!-- Application Structure Plan: A single-page application (SPA) model controlled by JavaScript. The UI is divided into distinct 'pages' (Dashboard, Pest Detection, Schemes, Community) which are selectively displayed. A dashboard-centric approach is chosen for the landing view as it provides the most critical, at-a-glance information immediately, which is crucial for a farmer's daily workflow. Navigation is handled by a persistent sidebar, and key actions are available via a floating action button, ensuring easy access to core functionalities from any view. This structure prioritizes usability and quick information retrieval. -->
-    <!-- Visualization & Content Choices: Dashboard Stats (Weather, Farm Summary): Goal: Inform. Method: Styled HTML cards. Interaction: None. Justification: Clear display of vital stats. AI Suggestions/Tasks: Goal: Guide. Method: Styled lists. Interaction: None. Justification: Easy-to-scan items. Market Prices: Goal: Compare. Method: HTML list with trend icons. Justification: Simple and effective. Pest Detection: Goal: Diagnose. Method: File upload UI with dynamic text report. Interaction: User image upload. Justification: Core interactive feature. Schemes/Community: Goal: Organize. Method: Card-based layouts. Interaction: Navigation. Justification: User-friendly pattern for content lists. Financials Chart: Goal: Compare. Method: Bar chart via Chart.js. Interaction: Tooltips on hover. Justification: Visualizes income vs expenses clearly. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -283,7 +279,7 @@
             transition: background-color 0.2s;
         }
         .video-facade:hover::before {
-             background-color: rgba(0,0,0,0);
+            background-color: rgba(0,0,0,0);
         }
         .video-facade::after {
             content: '';
@@ -320,18 +316,16 @@
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1.0); }
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
     </style>
 </head>
 <body class="bg-slate-100">
 
-    <!-- Signup Flow -->
     <div id="signup-flow" class="fixed inset-0 z-50 flex items-center justify-center p-4 signup-bg">
         <div class="w-full max-w-lg">
-            <!-- Phase 1: Contact Info -->
             <div id="signup-phase-1" class="signup-phase active bg-white p-8 rounded-2xl shadow-2xl">
                 <h2 class="text-3xl font-bold text-center text-slate-800">Create your Account</h2>
                 <p class="text-center text-slate-500 mt-2 mb-8">Let's get started with some basic details.</p>
@@ -354,101 +348,96 @@
                 <button id="guest-login-btn" class="w-full bg-slate-500 text-white font-bold text-lg py-3 px-6 rounded-lg hover:bg-slate-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Use as Guest</button>
             </div>
 
-            <!-- Phase 2: Farm Details -->
             <div id="signup-phase-2" class="signup-phase bg-white p-8 rounded-2xl shadow-2xl">
-                 <h2 class="text-3xl font-bold text-center text-slate-800">Tell us about your Farm</h2>
-                 <p class="text-center text-slate-500 mt-2 mb-8">This helps us personalize your experience.</p>
-                 <div class="space-y-4">
-                     <div>
-                         <label for="location" class="block text-sm font-medium text-slate-700">Location of Land</label>
-                         <input type="text" id="location" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., Thrissur, Kerala">
-                     </div>
-                     <div class="flex items-end gap-2">
-                         <div class="flex-grow">
-                              <label for="area" class="block text-sm font-medium text-slate-700">Area</label>
-                              <input type="number" id="area" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., 5">
-                         </div>
-                         <div>
-                             <select id="area-unit" class="h-[50px] mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm bg-white">
-                                 <option>Acre</option>
-                                 <option>Hectare</option>
-                                 <option>Cent</option>
-                                 <option>Square Feet</option>
-                                 <option>Square Meter</option>
+                    <h2 class="text-3xl font-bold text-center text-slate-800">Tell us about your Farm</h2>
+                    <p class="text-center text-slate-500 mt-2 mb-8">This helps us personalize your experience.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-slate-700">Location of Land</label>
+                            <input type="text" id="location" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., Thrissur, Kerala">
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <div class="flex-grow">
+                                 <label for="area" class="block text-sm font-medium text-slate-700">Area</label>
+                                 <input type="number" id="area" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., 5">
+                            </div>
+                            <div>
+                                <select id="area-unit" class="h-[50px] mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                    <option>Acre</option>
+                                    <option>Hectare</option>
+                                    <option>Cent</option>
+                                    <option>Square Feet</option>
+                                    <option>Square Meter</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="soil-type" class="block text-sm font-medium text-slate-700">Type of Soil</label>
+                            <select id="soil-type" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                <option>Laterite Soil</option>
+                                <option>Alluvial Soil</option>
+                                <option>Red Soil</option>
+                                <option>Black Soil</option>
+                                <option>Forest Loam</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="main-crop" class="block text-sm font-medium text-slate-700">Main Crops (select one)</label>
+                             <select id="main-crop" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                <option>Coconut</option>
+                                <option>Rubber</option>
+                                <option>Paddy (Rice)</option>
+                                <option>Pepper</option>
+                                <option>Cardamom</option>
+                                <option>Tea</option>
+                                <option>Banana</option>
                              </select>
-                         </div>
-                     </div>
-                      <div>
-                         <label for="soil-type" class="block text-sm font-medium text-slate-700">Type of Soil</label>
-                         <select id="soil-type" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                             <option>Laterite Soil</option>
-                             <option>Alluvial Soil</option>
-                             <option>Red Soil</option>
-                             <option>Black Soil</option>
-                             <option>Forest Loam</option>
-                         </select>
-                     </div>
-                     <div>
-                         <label for="main-crop" class="block text-sm font-medium text-slate-700">Main Crops (select one)</label>
-                          <select id="main-crop" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                             <option>Coconut</option>
-                             <option>Rubber</option>
-                             <option>Paddy (Rice)</option>
-                             <option>Pepper</option>
-                             <option>Cardamom</option>
-                             <option>Tea</option>
-                             <option>Banana</option>
-                          </select>
-                     </div>
-                      <div>
-                         <label for="irrigation" class="block text-sm font-medium text-slate-700">Irrigation System</label>
-                          <select id="irrigation" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                             <option>Rainwater Harvesting</option>
-                             <option>Borewell / Tube Well</option>
-                             <option>Canal</option>
-                             <option>River Lift</option>
-                             <option>Drip Irrigation</option>
-                          </select>
-                     </div>
-                 </div>
-                 <div class="mt-8 flex gap-4">
-                      <button id="prev-phase-2" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
-                      <button id="next-phase-2" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
-                 </div>
+                        </div>
+                         <div>
+                            <label for="irrigation" class="block text-sm font-medium text-slate-700">Irrigation System</label>
+                             <select id="irrigation" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                <option>Rainwater Harvesting</option>
+                                <option>Borewell / Tube Well</option>
+                                <option>Canal</option>
+                                <option>River Lift</option>
+                                <option>Drip Irrigation</option>
+                             </select>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <button id="prev-phase-2" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                        <button id="next-phase-2" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
+                    </div>
             </div>
 
-            <!-- Phase 3: Experience -->
             <div id="signup-phase-3" class="signup-phase bg-white p-8 rounded-2xl shadow-2xl">
-                 <h2 class="text-3xl font-bold text-center text-slate-800">One Last Step</h2>
-                 <p class="text-center text-slate-500 mt-2 mb-8">How would you describe your farming experience?</p>
-                 <div class="space-y-4">
-                     <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                         <span class="ml-4 font-medium text-slate-700">New Farmer (Beginner)</span>
-                     </label>
-                      <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
-                         <span class="ml-4 font-medium text-slate-700">Experienced (Moderate Knowledge)</span>
-                     </label>
-                      <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                         <span class="ml-4 font-medium text-slate-700">Expert (Know Everything)</span>
-                     </label>
-                 </div>
-                 <div class="mt-8 flex gap-4">
-                     <button id="prev-phase-3" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
-                     <button id="complete-signup" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Complete Sign Up</button>
-                 </div>
+                    <h2 class="text-3xl font-bold text-center text-slate-800">One Last Step</h2>
+                    <p class="text-center text-slate-500 mt-2 mb-8">How would you describe your farming experience?</p>
+                    <div class="space-y-4">
+                        <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                            <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                            <span class="ml-4 font-medium text-slate-700">New Farmer (Beginner)</span>
+                        </label>
+                         <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                            <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
+                            <span class="ml-4 font-medium text-slate-700">Experienced (Moderate Knowledge)</span>
+                        </label>
+                         <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                            <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                            <span class="ml-4 font-medium text-slate-700">Expert (Know Everything)</span>
+                        </label>
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <button id="prev-phase-3" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                        <button id="complete-signup" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Complete Sign Up</button>
+                    </div>
             </div>
         </div>
     </div>
 
-    <!-- Main App -->
     <div id="main-app" class="hidden md:flex">
-        <!-- Overlay for mobile nav -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
         
-        <!-- Sidebar Navigation -->
         <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white shadow-lg flex-col flex transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative md:w-20 lg:w-64">
             <div>
                 <div class="p-4 lg:p-6 text-center">
@@ -464,7 +453,7 @@
                     <a href="#pest-detection" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
                         <i class="ph-bold ph-bug text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Pest Detection</span>
                     </a>
-                     <a href="#marketplace" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
+                    <a href="#marketplace" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
                         <i class="ph-bold ph-storefront text-3xl"></i><span class="ml-4 font-semibold md:hidden lg:inline">Marketplace</span>
                     </a>
                     <a href="#knowledge-hub" class="nav-link flex items-center justify-center lg:justify-start px-4 lg:px-6 py-4 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-lg mx-2 my-1 transition-all duration-200">
@@ -490,9 +479,7 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 overflow-y-auto">
-            <!-- Mobile Header -->
             <header class="md:hidden bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-20">
                 <h1 class="text-2xl font-extrabold text-emerald-700">Krishi Sakhi</h1>
                 <button id="hamburger-btn" class="text-3xl text-slate-700">
@@ -501,57 +488,43 @@
             </header>
             <div class="p-4 md:p-8">
 
-                <!-- Page: Dashboard -->
                 <div id="dashboard" class="page active">
                     <h2 id="dashboard-greeting" class="text-4xl font-extrabold text-slate-800 mb-6">Welcome back, Farmer!</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 dashboard-grid">
                         
-                        <!-- Weather Card -->
                         <div id="weather-card" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
-                           <!-- Live weather data will be injected here -->
-                        </div>
+                            </div>
 
-                        <!-- Farm Condition Card -->
                         <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
                             <h3 class="font-bold text-slate-800 text-lg mb-4">Farm Condition</h3>
                             <div class="space-y-4" id="farm-conditions-container">
-                                <!-- Farm condition items will be injected here by JS -->
-                            </div>
+                                </div>
                         </div>
 
-                        <!-- Yield Prediction Card -->
                         <div id="yield-prediction-card" class="bg-white p-6 rounded-2xl shadow-lg card-hover">
-                             <!-- Yield prediction content will be injected by JS -->
-                        </div>
+                                </div>
 
-                        <!-- Market Prices Card -->
                         <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
                             <h3 class="font-bold text-slate-800 text-lg mb-4">Market Prices (Local Mandi)</h3>
                             <ul id="market-prices-list" class="space-y-3">
-                                <!-- Market price items will be injected here by JS -->
-                            </ul>
+                                </ul>
                         </div>
                         
-                        <!-- AI Suggestions Card -->
                         <div class="bg-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
                             <h3 class="font-bold text-slate-800 text-lg mb-4">AI Suggestions of the Day</h3>
                             <ul id="ai-suggestions-list" class="space-y-3">
-                                <!-- AI suggestion items will be injected here by JS -->
-                            </ul>
+                                </ul>
                         </div>
 
-                        <!-- Upcoming Tasks Card -->
                         <div class="bg-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
                             <h3 class="font-bold text-slate-800 text-lg mb-4">Upcoming Tasks</h3>
                             <ul id="upcoming-tasks-list" class="space-y-3">
-                                <!-- Upcoming task items will be injected here by JS -->
-                            </ul>
+                                </ul>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- Page: Financials -->
                 <div id="financials" class="page">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-4xl font-extrabold text-slate-800">Financials Dashboard</h2>
@@ -560,8 +533,7 @@
                         </button>
                     </div>
                     <div id="financials-summary-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <!-- Financial summary cards will be injected by JS -->
-                    </div>
+                        </div>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
                             <h3 class="font-bold text-slate-800 text-lg mb-4">Income vs Expenses (Last 6 Months)</h3>
@@ -577,16 +549,14 @@
                                 </div>
                             </div>
                             <div class="bg-white p-6 rounded-2xl shadow-lg">
-                                 <h3 class="font-bold text-slate-800 text-lg mb-4">Recent Transactions</h3>
-                                 <ul id="transactions-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
-                                     <!-- Transactions will be injected here by JS -->
-                                 </ul>
+                                    <h3 class="font-bold text-slate-800 text-lg mb-4">Recent Transactions</h3>
+                                    <ul id="transactions-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
+                                        </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Page: Pest Detection -->
                 <div id="pest-detection" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Pest & Disease Detection</h2>
                     <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
@@ -602,10 +572,10 @@
                         </div>
 
                         <div id="preview-section" class="hidden">
-                             <img id="image-preview" src="#" alt="Crop Preview" class="max-h-64 w-auto mx-auto rounded-lg shadow-md"/>
-                             <button id="analyze-button" class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                 <i class="ph-bold ph-magnifying-glass mr-2"></i>Analyze Image
-                            </button>
+                                <img id="image-preview" src="#" alt="Crop Preview" class="max-h-64 w-auto mx-auto rounded-lg shadow-md"/>
+                                <button id="analyze-button" class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                                    <i class="ph-bold ph-magnifying-glass mr-2"></i>Analyze Image
+                                </button>
                         </div>
                         
                         <div id="analysis-report" class="mt-6 hidden">
@@ -647,31 +617,24 @@
                     </div>
                 </div>
 
-                <!-- Page: Marketplace -->
                 <div id="marketplace" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Marketplace - Connect with Buyers</h2>
                     <div id="buyers-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Buyer cards will be injected by JS -->
-                    </div>
+                        </div>
                 </div>
                 
-                <!-- Page: Knowledge Hub -->
                 <div id="knowledge-hub" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Knowledge Hub</h2>
                     <div id="articles-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Article cards will be injected by JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- Page: Schemes -->
                 <div id="schemes" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Government Schemes & Subsidies</h2>
                     <div id="schemes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Scheme cards will be injected here by JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- Page: Community -->
                 <div id="community" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Community Forum</h2>
                     <div class="max-w-3xl mx-auto">
@@ -680,25 +643,21 @@
                             <button class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-colors">Post to Community</button>
                         </div>
                         <div id="forum-posts" class="space-y-4">
-                            <!-- Forum posts will be injected here by JS -->
-                        </div>
+                            </div>
                     </div>
                 </div>
 
-                <!-- Page: Future Advancement -->
                 <div id="future-advancement" class="page">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-6">Future Advancements</h2>
                     <p class="text-lg text-slate-600 mb-8 max-w-3xl">Here's a roadmap of exciting features we're planning to introduce to make Krishi Sakhi even more powerful for the farming community.</p>
                     <div id="future-features-list" class="space-y-6">
-                        <!-- Future feature cards will be injected here by JS -->
-                    </div>
+                        </div>
                 </div>
 
             </div>
         </main>
     </div>
     
-    <!-- AI Chat Popup -->
     <div id="chat-popup">
         <div id="chat-popup-header">
             <h3>AI Assistant</h3>
@@ -736,7 +695,7 @@
                 <div id="search-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" height="24" fill="none" class="feather feather-search">
                         <circle stroke="url(#search)" r="8" cy="11" cx="11"></circle>
-                        <line stroke="url(#searchl)" y2="16.65" y1="22" x2="16.65" x1="22" ></line>
+                        <line stroke="url(#searchl)" y2="16.65" y1="22" x2="16.65" x1="22"></line>
                         <defs>
                             <linearGradient gradientTransform="rotate(50)" id="search">
                             <stop stop-color="#f8e7f8" offset="0%"></stop>
@@ -753,10 +712,8 @@
         </div>
     </div>
 
-    <!-- Floating Action Buttons Container -->
     <div id="fab-container" class="fixed bottom-6 right-6 z-50 hidden">
         <div class="relative flex flex-col items-center space-y-4">
-            <!-- Quick Actions Menu (Popping up above the button) -->
             <div id="quick-actions-menu" class="flex flex-col items-end space-y-2 mb-2 hidden">
                 <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="log">
                     <i class="ph-bold ph-clipboard-text text-xl text-emerald-600"></i>
@@ -772,19 +729,16 @@
                 </button>
             </div>
             
-            <!-- Chat Toggle Button -->
             <button id="chat-toggle-btn" class="bg-amber-500 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-amber-600 transition-transform hover:scale-110">
                 <i class="ph-fill ph-chat-circle-dots"></i>
             </button>
     
-            <!-- Quick Actions Toggle Button -->
             <button id="quick-actions-toggle" class="bg-emerald-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-emerald-700 transition-all hover:scale-110">
                 <i class="ph-bold ph-plus"></i>
             </button>
         </div>
     </div>
     
-    <!-- Log Activity Modal -->
     <div id="log-activity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-[120]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
             <h3 class="text-2xl font-bold text-slate-800 mb-4">Log Farm Activity</h3>
@@ -797,19 +751,17 @@
         </div>
     </div>
     
-    <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 bg-emerald-600 text-white py-3 px-6 rounded-lg shadow-lg opacity-0 transform -translate-y-12 toast z-[200]">
         <p id="toast-message" class="font-semibold"></p>
     </div>
 
-    <!-- Scheme Details Modal -->
     <div id="scheme-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[140]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center">
-                 <h3 id="modal-scheme-title" class="text-3xl font-bold text-slate-800"></h3>
-                 <button id="modal-scheme-close" class="text-slate-500 hover:text-slate-800 text-2xl">
-                    <i class="ph-bold ph-x-circle"></i>
-                 </button>
+                    <h3 id="modal-scheme-title" class="text-3xl font-bold text-slate-800"></h3>
+                    <button id="modal-scheme-close" class="text-slate-500 hover:text-slate-800 text-2xl">
+                        <i class="ph-bold ph-x-circle"></i>
+                    </button>
             </div>
             
             <div class="mt-6">
@@ -824,8 +776,8 @@
             </div>
 
             <div id="modal-youtube-container" class="mt-6">
-                 <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Video</h4>
-                 <iframe id="modal-youtube-video" class="w-full aspect-video rounded-lg" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Video</h4>
+                    <iframe id="modal-youtube-video" class="w-full aspect-video rounded-lg" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
 
             <div class="mt-8">
@@ -836,7 +788,6 @@
         </div>
     </div>
 
-    <!-- Log Transaction Modal -->
     <div id="log-transaction-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[130]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
@@ -880,24 +831,21 @@
         </div>
     </div>
 
-    <!-- Knowledge Hub Details Modal -->
     <div id="knowledge-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[145]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                 <h3 id="modal-knowledge-title" class="text-3xl font-bold text-slate-800"></h3>
-                 <button id="modal-knowledge-close" class="text-slate-500 hover:text-slate-800 text-2xl">
-                    <i class="ph-bold ph-x-circle"></i>
-                 </button>
+                    <h3 id="modal-knowledge-title" class="text-3xl font-bold text-slate-800"></h3>
+                    <button id="modal-knowledge-close" class="text-slate-500 hover:text-slate-800 text-2xl">
+                        <i class="ph-bold ph-x-circle"></i>
+                    </button>
             </div>
             
             <div id="modal-knowledge-content" class="text-slate-600 mt-4 prose prose-emerald max-w-none">
-                <!-- Detailed content will be injected here -->
-            </div>
+                </div>
 
             <div id="modal-knowledge-youtube-container" class="mt-6 space-y-4">
-                 <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Videos</h4>
-                 <!-- YouTube videos will be injected here -->
-            </div>
+                    <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Videos</h4>
+                    </div>
         </div>
     </div>
 
@@ -965,7 +913,7 @@
             showPhase(currentPhase);
         });
 
-         document.getElementById('prev-phase-3').addEventListener('click', () => {
+        document.getElementById('prev-phase-3').addEventListener('click', () => {
             currentPhase = 2;
             showPhase(currentPhase);
         });
@@ -973,7 +921,7 @@
         document.getElementById('complete-signup').addEventListener('click', () => {
             const userEmail = emailInput.value.trim();
             if (userEmail && userEmail.includes('@')) {
-                 currentUser = userEmail.split('@')[0];
+                currentUser = userEmail.split('@')[0];
             } else {
                 currentUser = 'User';
             }
@@ -1023,7 +971,7 @@
                 { time: 'Tomorrow', task: 'Pest scouting for coconut trees.' },
                 { time: 'In 3 days', task: 'Begin next irrigation cycle for paddy fields.' },
             ],
-             pestDetectionReport: {
+            pestDetectionReport: {
                 diseaseName: 'Leaf Blight (Minor Severity)',
                 confidence: 'Confidence: 85%',
                 recommendedAction: 'Apply a copper-based fungicide like Bordeaux mixture (1%) on affected areas. Ensure proper air circulation around plants and avoid overhead watering.',
@@ -1158,6 +1106,7 @@
                     title: 'Advanced Irrigation Techniques for Paddy Fields', 
                     category: 'Water Management', 
                     readTime: '8 min',
+                    image: 'assets/figure1.png',
                     modalTitle: 'Advanced Irrigation Techniques for Paddy Fields',
                     detailedContent: `
                         <p class="text-slate-600 mt-2">Paddy (rice) cultivation traditionally relies on continuous flooding, which leads to large water use, inefficiencies, and greenhouse gas emissions. Advanced irrigation strategies aim to optimize water use, improve yields, and reduce environmental impacts.</p>
@@ -1219,6 +1168,7 @@
                     title: 'Organic Pest Control for Common Vegetables', 
                     category: 'Pest Control', 
                     readTime: '12 min',
+                    image: 'assets/figure2.png',
                     modalTitle: 'Organic Pest Control for Common Vegetables',
                     detailedContent: `
                         <p class="text-slate-600 mt-2">Conventional chemical pesticides can harm beneficial insects, degrade soil health, and leave residues. Organic (or biocontrol-based) management emphasizes ecological balance and prevention.</p>
@@ -1249,6 +1199,7 @@
                     title: 'Understanding Soil Health and Nutrients', 
                     category: 'Soil Health', 
                     readTime: '15 min',
+                    image: 'assets/figure3.png',
                     modalTitle: 'Understanding Soil Health and Nutrients',
                     detailedContent: `
                         <p class="text-slate-600 mt-2">Soil health refers to the capacity of soil to function as a living ecosystem that sustains plants, animals, and humans. It involves the physical structure, chemical fertility, and biological activity of soil.</p>
@@ -1562,11 +1513,11 @@
             const container = document.getElementById('future-features-list');
             container.innerHTML = MOCK_DATA.futureAdvancements.map(item => `
                 <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
-                     <h3 class="text-2xl font-bold text-emerald-700">${item.title}</h3>
-                     <p class="text-slate-600 mt-2">${item.description}</p>
-                     <ul class="list-disc list-inside mt-4 space-y-1 text-slate-500">
-                         ${item.details.map(detail => `<li>${detail}</li>`).join('')}
-                     </ul>
+                    <h3 class="text-2xl font-bold text-emerald-700">${item.title}</h3>
+                    <p class="text-slate-600 mt-2">${item.description}</p>
+                    <ul class="list-disc list-inside mt-4 space-y-1 text-slate-500">
+                        ${item.details.map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>
                 </div>
             `).join('');
         }
@@ -1576,8 +1527,8 @@
             container.innerHTML = MOCK_DATA.buyers.map(buyer => `
                 <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
                     <div class="flex justify-between items-start">
-                         <h3 class="font-bold text-slate-800 text-lg">${buyer.name}</h3>
-                         <div class="flex items-center bg-amber-100 text-amber-800 text-sm font-bold px-2.5 py-1 rounded-full">
+                        <h3 class="font-bold text-slate-800 text-lg">${buyer.name}</h3>
+                        <div class="flex items-center bg-amber-100 text-amber-800 text-sm font-bold px-2.5 py-1 rounded-full">
                             <i class="ph-fill ph-star text-amber-500"></i>
                             <span class="ml-1">${buyer.rating}</span>
                         </div>
@@ -1596,20 +1547,23 @@
         
         function renderKnowledgeHub() {
              const container = document.getElementById('articles-list');
-             container.innerHTML = MOCK_DATA.knowledgeArticles.map((article, index) => `
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
-                    <div class="bg-gradient-to-r from-amber-400 to-yellow-400 h-28"></div>
-                    <div class="p-6">
-                        <p class="text-sm text-amber-700 font-semibold">${article.category}</p>
-                        <h3 class="font-bold text-slate-800 text-lg mt-2">${article.title}</h3>
-                        <div class="flex justify-between items-center mt-4 text-sm text-slate-500">
-                            <span>${article.readTime} read</span>
-                            <button class="learn-more-knowledge-btn font-semibold text-emerald-600 hover:underline" data-knowledge-id="${index}">Read More <i class="ph-bold ph-arrow-right"></i></button>
-                        </div>
-                    </div>
-                </div>
-             `).join('');
-        }
+             container.innerHTML = MOCK_DATA.knowledgeArticles.map((article, index) => {
+                 const imageUrl = article.image;
+                 return `
+                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
+                     <div class="h-28 bg-cover bg-center" style="background-image: url('${imageUrl}');"></div>
+                     <div class="p-6">
+                         <p class="text-sm text-amber-700 font-semibold">${article.category}</p>
+                         <h3 class="font-bold text-slate-800 text-lg mt-2">${article.title}</h3>
+                         <div class="flex justify-between items-center mt-4 text-sm text-slate-500">
+                             <span>${article.readTime} read</span>
+                             <button class="learn-more-knowledge-btn font-semibold text-emerald-600 hover:underline" data-knowledge-id="${index}">Read More <i class="ph-bold ph-arrow-right"></i></button>
+                         </div>
+                     </div>
+                 </div>
+                 `;
+             }).join('');
+         }
 
         function renderSchemes() {
             const container = document.getElementById('schemes-list');
@@ -1669,7 +1623,7 @@
             if (hash === '#financials') {
                 renderFinancials();
             }
-             // Close sidebar on mobile after navigation
+            // Close sidebar on mobile after navigation
             if (window.innerWidth < 768) {
                 if(!sidebar.classList.contains('-translate-x-full')) {
                     toggleSidebar();
@@ -1825,44 +1779,79 @@ ${reportData.organicAlternatives}
             }
         }
         
-        function getAiResponse(message) {
-            const lowerCaseMessage = message.toLowerCase();
-            if (lowerCaseMessage.includes('weather')) {
-                const weather = MOCK_DATA.weather.current;
-                return `The current weather in Thrissur is ${weather.temp}°C with ${weather.humidity}% humidity. It's currently ${weather.condition}.`;
-            } else if (lowerCaseMessage.includes('market') || lowerCaseMessage.includes('price')) {
-                const prices = MOCK_DATA.marketPrices.map(item => `${item.name} at ${item.price}`).join(', ');
-                return `Today's market prices are: ${prices}.`;
-            } else if (lowerCaseMessage.includes('fertilizer')) {
-                return "For coconut crops at this stage, an NPK ratio of 10-5-20 is recommended. Would you like me to show you some organic options?";
-            } else if (lowerCaseMessage.includes('pest') || lowerCaseMessage.includes('disease')) {
-                return "I can help with that. Please go to the 'Pest Detection' section and upload a photo of the affected plant for an AI analysis.";
-            } else if (lowerCaseMessage.includes('hello') || lowerCaseMessage.includes('hi')) {
-                return "Hello! How can I assist you with your farming today?";
+        // =======================================================
+        // ========== START OF THE NEW CHATBOT API CODE ==========
+        // =======================================================
+
+        // IMPORTANT: Replace with your actual API key from Google AI Studio
+        const API_KEY = 'YOUR_GEMINI_API_KEY';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+        
+        /**
+         * Sends a message to the Gemini API and gets a response.
+         * @param {string} message The user's message.
+         * @returns {Promise<string>} The AI's response.
+         */
+        async function getGeminiResponse(message) {
+            // This is "prompt engineering". We give the AI a persona and context.
+            const fullPrompt = `You are Krishi Sakhi, an expert AI assistant for Indian farmers, specializing in topics relevant to Kerala agriculture (like coconuts, rubber, paddy, spices). Your tone is helpful, encouraging, and easy to understand. Do not use complex jargon. Answer the following user query: "${message}"`;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: fullPrompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                // Safely access the response text
+                const text = data.candidates[0]?.content?.parts[0]?.text;
+                return text || "I'm sorry, I couldn't generate a response. Please try again.";
+
+            } catch (error) {
+                console.error("Error fetching from Gemini API:", error);
+                return "Sorry, I'm having trouble connecting to my brain right now. Please check your API key or network connection and try again.";
             }
-            
-            return "I'm sorry, I can only provide information about weather, market prices, fertilizer, and pests right now. Please try asking one of those topics.";
         }
-
-
-        function handleAiChatMessageSend() {
+        
+        /**
+         * Handles the entire process of sending a user message and displaying the AI response.
+         */
+        async function handleAiChatMessageSend() {
             const userMessage = aiChatInput.value.trim();
             if (userMessage) {
                 addAiChatMessage(userMessage, 'user');
                 aiChatInput.value = '';
                 showTypingIndicator();
                 
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    const aiResponse = getAiResponse(userMessage);
-                    addAiChatMessage(aiResponse, 'ai');
-                }, 1500 + Math.random() * 500); // simulate thinking
+                // Call the new async function and wait for the response
+                const aiResponse = await getGeminiResponse(userMessage);
+                
+                removeTypingIndicator();
+                addAiChatMessage(aiResponse, 'ai');
             }
         }
+
+        // =====================================================
+        // ========== END OF THE NEW CHATBOT API CODE ==========
+        // =====================================================
 
         aiChatSendBtn.addEventListener('click', handleAiChatMessageSend);
         aiChatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
+                e.preventDefault(); // Prevents form submission if it's inside a form
                 handleAiChatMessageSend();
             }
         });
@@ -2125,4 +2114,3 @@ ${reportData.organicAlternatives}
     </script>
 </body>
 </html>
-

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krishi Sakhi - AI Farming Assistant</title>
+    <title>Krishi Sakhi | AI Farming Assistant</title>
     <!-- Chosen Palette: Lush Emerald & Warm Amber -->
     <!-- Application Structure Plan: A single-page application (SPA) model controlled by JavaScript. The UI is divided into distinct 'pages' (Dashboard, Pest Detection, Schemes, Community) which are selectively displayed. A dashboard-centric approach is chosen for the landing view as it provides the most critical, at-a-glance information immediately, which is crucial for a farmer's daily workflow. Navigation is handled by a persistent sidebar, and key actions are available via a floating action button, ensuring easy access to core functionalities from any view. This structure prioritizes usability and quick information retrieval. -->
     <!-- Visualization & Content Choices: Dashboard Stats (Weather, Farm Summary): Goal: Inform. Method: Styled HTML cards. Interaction: None. Justification: Clear display of vital stats. AI Suggestions/Tasks: Goal: Guide. Method: Styled lists. Interaction: None. Justification: Easy-to-scan items. Market Prices: Goal: Compare. Method: HTML list with trend icons. Justification: Simple and effective. Pest Detection: Goal: Diagnose. Method: File upload UI with dynamic text report. Interaction: User image upload. Justification: Core interactive feature. Schemes/Community: Goal: Organize. Method: Card-based layouts. Interaction: Navigation. Justification: User-friendly pattern for content lists. Financials Chart: Goal: Compare. Method: Bar chart via Chart.js. Interaction: Tooltips on hover. Justification: Visualizes income vs expenses clearly. -->
@@ -34,9 +34,6 @@
             color: white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        .chat-bubble {
-            max-width: 80%;
-        }
         .chart-container {
             position: relative;
             width: 100%;
@@ -65,6 +62,268 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* --- AI Chat Popup Styles --- */
+        #chat-popup {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 50%;
+            background-color: #010201;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-in-out, width 0.5s ease-in-out;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+        }
+        #chat-popup.active {
+            transform: translateX(0);
+        }
+        #chat-popup.expanded {
+            width: 60%; /* 3/5 of the screen */
+        }
+
+        @media (max-width: 1024px) {
+            #chat-popup { width: 60%; }
+            #chat-popup.expanded { width: 75%; }
+        }
+        @media (max-width: 768px) {
+            #chat-popup { width: 100%; }
+            #chat-popup.expanded { width: 100%; }
+        }
+
+        #chat-popup-header {
+            padding: 1rem 1.5rem;
+            background-color: #111827;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        #chat-popup-header h3 {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        #chat-popup-controls button {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+        #chat-popup-controls button:hover {
+            color: white;
+        }
+
+        #chat-popup-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #chat-popup-history::-webkit-scrollbar { width: 8px; }
+        #chat-popup-history::-webkit-scrollbar-track { background: #111827; }
+        #chat-popup-history::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+
+        .ai-bubble, .user-bubble {
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            max-width: 75%;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        .ai-bubble {
+            background-color: #374151;
+            color: #e5e7eb;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .user-bubble {
+            background: linear-gradient(to right, #6e1b60, #402fb5);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        #ai-chat-container {
+            position: relative;
+            z-index: 1;
+            padding: 1rem 0;
+            flex-shrink: 0;
+        }
+
+        #ai-chat-container .white,
+        #ai-chat-container .border,
+        #ai-chat-container .darkBorderBg,
+        #ai-chat-container .glow {
+            max-height: 70px;
+            max-width: 314px;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            overflow: hidden;
+            z-index: -1;
+            border-radius: 12px;
+            filter: blur(3px);
+        }
+        #ai-chat-container .input {
+            background-color: #010201;
+            border: none;
+            width: 301px;
+            height: 56px;
+            border-radius: 10px;
+            color: white;
+            padding-inline: 59px;
+            font-size: 18px;
+        }
+
+        #ai-chat-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #ai-chat-container .input::placeholder { color: #c0b9c0; }
+        #ai-chat-container .input:focus { outline: none; }
+        #ai-chat-container #main:focus-within > #input-mask { display: none; }
+
+        #ai-chat-container #input-mask {
+            pointer-events: none;
+            width: 100px;
+            height: 20px;
+            position: absolute;
+            background: linear-gradient(90deg, transparent, black);
+            top: 18px;
+            left: 70px;
+        }
+        #ai-chat-container #pink-mask {
+            pointer-events: none;
+            width: 30px;
+            height: 20px;
+            position: absolute;
+            background: #cf30aa;
+            top: 10px;
+            left: 5px;
+            filter: blur(20px);
+            opacity: 0.8;
+            transition: all 2s;
+        }
+        #ai-chat-container #main:hover > #pink-mask { opacity: 0; }
+        #ai-chat-container .white { max-height: 63px; max-width: 307px; border-radius: 10px; filter: blur(2px); }
+
+        #ai-chat-container .white::before {
+            content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(83deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.4);
+            background-image: conic-gradient( rgba(0, 0, 0, 0) 0%, #a099d8, rgba(0, 0, 0, 0) 8%, rgba(0, 0, 0, 0) 50%, #dfa2da, rgba(0, 0, 0, 0) 58% );
+            transition: all 2s;
+        }
+        #ai-chat-container .border { max-height: 59px; max-width: 303px; border-radius: 11px; filter: blur(0.5px); }
+        #ai-chat-container .border::before {
+            content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(70deg); position: absolute; width: 600px; height: 600px; filter: brightness(1.3); background-repeat: no-repeat; background-position: 0 0;
+            background-image: conic-gradient( #1c191c, #402fb5 5%, #1c191c 14%, #1c191c 50%, #cf30aa 60%, #1c191c 64% );
+            transition: all 2s;
+        }
+        #ai-chat-container .darkBorderBg { max-height: 65px; max-width: 312px; }
+        #ai-chat-container .darkBorderBg::before {
+            content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(82deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0;
+            background-image: conic-gradient( rgba(0, 0, 0, 0), #18116a, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 50%, #6e1b60, rgba(0, 0, 0, 0) 60% );
+            transition: all 2s;
+        }
+        #ai-chat-container:hover > .darkBorderBg::before, #ai-chat-container:focus-within > .darkBorderBg::before { transform: translate(-50%, -50%) rotate(262deg); }
+        #ai-chat-container:hover > .glow::before, #ai-chat-container:focus-within > .glow::before { transform: translate(-50%, -50%) rotate(240deg); }
+        #ai-chat-container:hover > .white::before, #ai-chat-container:focus-within > .white::before { transform: translate(-50%, -50%) rotate(263deg); }
+        #ai-chat-container:hover > .border::before, #ai-chat-container:focus-within > .border::before { transform: translate(-50%, -50%) rotate(250deg); }
+
+        #ai-chat-container .glow { overflow: hidden; filter: blur(30px); opacity: 0.4; max-height: 130px; max-width: 354px; }
+        #ai-chat-container .glow:before {
+            content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(60deg); position: absolute; width: 999px; height: 999px; background-repeat: no-repeat; background-position: 0 0;
+            background-image: conic-gradient( #000, #402fb5 5%, #000 38%, #000 50%, #cf30aa 60%, #000 87% );
+            transition: all 2s;
+        }
+
+        #ai-chat-container #filter-icon {
+            position: absolute; top: 8px; right: 8px; display: flex; align-items: center; justify-content: center; z-index: 2; max-height: 40px; max-width: 38px; height: 100%; width: 100%; isolation: isolate; overflow: hidden; border-radius: 10px; background: linear-gradient(180deg, #161329, black, #1d1b4b); border: 1px solid transparent;
+        }
+        #ai-chat-container .filterBorder {
+            height: 42px; width: 40px; position: absolute; overflow: hidden; top: 7px; right: 7px; border-radius: 10px;
+        }
+
+        #ai-chat-container .filterBorder::before {
+            content: ""; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.35);
+            background-image: conic-gradient( rgba(0, 0, 0, 0), #3d3a4f, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 50%, #3d3a4f, rgba(0, 0, 0, 0) 100% );
+            animation: rotate 4s linear infinite;
+        }
+        @keyframes rotate { 100% { transform: translate(-50%, -50%) rotate(450deg); } }
+
+        #ai-chat-container #main { position: relative; }
+        #ai-chat-container #search-icon { position: absolute; left: 20px; top: 15px; cursor: pointer; }
+        
+        .video-facade {
+            position: relative;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            aspect-ratio: 16 / 9;
+        }
+        .video-facade::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+        }
+        .video-facade:hover::before {
+             background-color: rgba(0,0,0,0);
+        }
+        .video-facade::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 68px;
+            height: 48px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 48"><path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="rgba(255,0,0,0.9)"></path><path d="M 27,19 43,24 27,29" fill="%23fff"></path></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.2s;
+        }
+        .video-facade:hover::after {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+        }
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            margin: 0 2px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1.0); }
+        }
+
     </style>
 </head>
 <body class="bg-slate-100">
@@ -100,61 +359,61 @@
                  <h2 class="text-3xl font-bold text-center text-slate-800">Tell us about your Farm</h2>
                  <p class="text-center text-slate-500 mt-2 mb-8">This helps us personalize your experience.</p>
                  <div class="space-y-4">
-                    <div>
-                        <label for="location" class="block text-sm font-medium text-slate-700">Location of Land</label>
-                        <input type="text" id="location" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., Thrissur, Kerala">
-                    </div>
-                    <div class="flex items-end gap-2">
-                        <div class="flex-grow">
-                             <label for="area" class="block text-sm font-medium text-slate-700">Area</label>
-                             <input type="number" id="area" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., 5">
-                        </div>
-                        <div>
-                            <select id="area-unit" class="h-[50px] mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm bg-white">
-                                <option>Acre</option>
-                                <option>Hectare</option>
-                                <option>Cent</option>
-                                <option>Square Feet</option>
-                                <option>Square Meter</option>
-                            </select>
-                        </div>
-                    </div>
                      <div>
-                        <label for="soil-type" class="block text-sm font-medium text-slate-700">Type of Soil</label>
-                        <select id="soil-type" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                            <option>Laterite Soil</option>
-                            <option>Alluvial Soil</option>
-                            <option>Red Soil</option>
-                            <option>Black Soil</option>
-                            <option>Forest Loam</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="main-crop" class="block text-sm font-medium text-slate-700">Main Crops (select one)</label>
-                         <select id="main-crop" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                            <option>Coconut</option>
-                            <option>Rubber</option>
-                            <option>Paddy (Rice)</option>
-                            <option>Pepper</option>
-                            <option>Cardamom</option>
-                            <option>Tea</option>
-                            <option>Banana</option>
+                         <label for="location" class="block text-sm font-medium text-slate-700">Location of Land</label>
+                         <input type="text" id="location" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., Thrissur, Kerala">
+                     </div>
+                     <div class="flex items-end gap-2">
+                         <div class="flex-grow">
+                              <label for="area" class="block text-sm font-medium text-slate-700">Area</label>
+                              <input type="number" id="area" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm" placeholder="e.g., 5">
+                         </div>
+                         <div>
+                             <select id="area-unit" class="h-[50px] mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm bg-white">
+                                 <option>Acre</option>
+                                 <option>Hectare</option>
+                                 <option>Cent</option>
+                                 <option>Square Feet</option>
+                                 <option>Square Meter</option>
+                             </select>
+                         </div>
+                     </div>
+                      <div>
+                         <label for="soil-type" class="block text-sm font-medium text-slate-700">Type of Soil</label>
+                         <select id="soil-type" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                             <option>Laterite Soil</option>
+                             <option>Alluvial Soil</option>
+                             <option>Red Soil</option>
+                             <option>Black Soil</option>
+                             <option>Forest Loam</option>
                          </select>
-                    </div>
+                     </div>
                      <div>
-                        <label for="irrigation" class="block text-sm font-medium text-slate-700">Irrigation System</label>
-                         <select id="irrigation" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
-                            <option>Rainwater Harvesting</option>
-                            <option>Borewell / Tube Well</option>
-                            <option>Canal</option>
-                            <option>River Lift</option>
-                            <option>Drip Irrigation</option>
-                         </select>
-                    </div>
+                         <label for="main-crop" class="block text-sm font-medium text-slate-700">Main Crops (select one)</label>
+                          <select id="main-crop" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                             <option>Coconut</option>
+                             <option>Rubber</option>
+                             <option>Paddy (Rice)</option>
+                             <option>Pepper</option>
+                             <option>Cardamom</option>
+                             <option>Tea</option>
+                             <option>Banana</option>
+                          </select>
+                     </div>
+                      <div>
+                         <label for="irrigation" class="block text-sm font-medium text-slate-700">Irrigation System</label>
+                          <select id="irrigation" class="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm bg-white">
+                             <option>Rainwater Harvesting</option>
+                             <option>Borewell / Tube Well</option>
+                             <option>Canal</option>
+                             <option>River Lift</option>
+                             <option>Drip Irrigation</option>
+                          </select>
+                     </div>
                  </div>
                  <div class="mt-8 flex gap-4">
-                     <button id="prev-phase-2" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
-                     <button id="next-phase-2" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
+                      <button id="prev-phase-2" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                      <button id="next-phase-2" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Next</button>
                  </div>
             </div>
 
@@ -163,22 +422,22 @@
                  <h2 class="text-3xl font-bold text-center text-slate-800">One Last Step</h2>
                  <p class="text-center text-slate-500 mt-2 mb-8">How would you describe your farming experience?</p>
                  <div class="space-y-4">
-                    <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                        <span class="ml-4 font-medium text-slate-700">New Farmer (Beginner)</span>
-                    </label>
                      <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
-                        <span class="ml-4 font-medium text-slate-700">Experienced (Moderate Knowledge)</span>
-                    </label>
-                     <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
-                        <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                        <span class="ml-4 font-medium text-slate-700">Expert (Know Everything)</span>
-                    </label>
+                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                         <span class="ml-4 font-medium text-slate-700">New Farmer (Beginner)</span>
+                     </label>
+                      <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500" checked>
+                         <span class="ml-4 font-medium text-slate-700">Experienced (Moderate Knowledge)</span>
+                     </label>
+                      <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500 transition-all cursor-pointer">
+                         <input type="radio" name="experience" class="h-4 w-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                         <span class="ml-4 font-medium text-slate-700">Expert (Know Everything)</span>
+                     </label>
                  </div>
                  <div class="mt-8 flex gap-4">
-                    <button id="prev-phase-3" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
-                    <button id="complete-signup" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Complete Sign Up</button>
+                     <button id="prev-phase-3" class="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 transition-all">Previous</button>
+                     <button id="complete-signup" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">Complete Sign Up</button>
                  </div>
             </div>
         </div>
@@ -248,19 +507,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 dashboard-grid">
                         
                         <!-- Weather Card -->
-                        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
-                            <h3 class="font-bold text-lg mb-4 opacity-90">Weather Updates</h3>
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <p class="text-sm opacity-80">Thrissur, Kerala</p>
-                                    <p class="text-6xl font-extrabold">29°C</p>
-                                    <p class="font-semibold">Humidity: 85%</p>
-                                </div>
-                                <i class="ph-fill ph-cloud-sun text-8xl opacity-80"></i>
-                            </div>
-                            <div class="mt-6 grid grid-cols-5 gap-2 text-center">
-                                <!-- Forecast items will be injected here by JS -->
-                            </div>
+                        <div id="weather-card" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg col-span-1 md:col-span-2 card-hover">
+                           <!-- Live weather data will be injected here -->
                         </div>
 
                         <!-- Farm Condition Card -->
@@ -331,7 +579,7 @@
                             <div class="bg-white p-6 rounded-2xl shadow-lg">
                                  <h3 class="font-bold text-slate-800 text-lg mb-4">Recent Transactions</h3>
                                  <ul id="transactions-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
-                                    <!-- Transactions will be injected here by JS -->
+                                     <!-- Transactions will be injected here by JS -->
                                  </ul>
                             </div>
                         </div>
@@ -356,7 +604,7 @@
                         <div id="preview-section" class="hidden">
                              <img id="image-preview" src="#" alt="Crop Preview" class="max-h-64 w-auto mx-auto rounded-lg shadow-md"/>
                              <button id="analyze-button" class="mt-4 w-full bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                <i class="ph-bold ph-magnifying-glass mr-2"></i>Analyze Image
+                                 <i class="ph-bold ph-magnifying-glass mr-2"></i>Analyze Image
                             </button>
                         </div>
                         
@@ -449,53 +697,95 @@
             </div>
         </main>
     </div>
-
-    <!-- Quick Actions Floating Button -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <div id="quick-actions-menu" class="absolute bottom-16 right-0 mb-2 space-y-2 hidden">
-             <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="log">
-                <i class="ph-bold ph-clipboard-text text-xl text-emerald-600"></i>
-                <span class="ml-3 font-semibold">Log Activity</span>
-            </button>
-            <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="upload">
-                <i class="ph-bold ph-camera text-xl text-emerald-600"></i>
-                <span class="ml-3 font-semibold">Upload Photo</span>
-            </button>
-            <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="community">
-                <i class="ph-bold ph-chats-circle text-xl text-emerald-600"></i>
-                <span class="ml-3 font-semibold">Ask Community</span>
-            </button>
-        </div>
-        <button id="quick-actions-toggle" class="bg-emerald-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-emerald-700 transition-transform hover:scale-110">
-            <i class="ph-bold ph-plus"></i>
-        </button>
-    </div>
     
-    <!-- Conversational AI Assistant -->
-    <div id="chat-widget" class="fixed bottom-24 right-6 hidden md:block z-50">
-        <div id="chat-window" class="w-80 h-96 bg-white rounded-2xl shadow-2xl flex flex-col hidden">
-            <div class="bg-emerald-600 text-white p-3 rounded-t-2xl">
-                <h4 class="font-semibold text-center">Krishi Sakhi Assistant</h4>
+    <!-- AI Chat Popup -->
+    <div id="chat-popup">
+        <div id="chat-popup-header">
+            <h3>AI Assistant</h3>
+            <div id="chat-popup-controls" class="flex items-center gap-2">
+                <button id="expand-chat-btn" title="Expand/Collapse">
+                    <i class="ph-bold ph-arrows-out-line-horizontal text-xl"></i>
+                </button>
+                <button id="close-chat-btn" title="Close">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
             </div>
-            <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-4">
-                <div class="flex">
-                    <div class="bg-slate-200 p-3 rounded-lg chat-bubble">
-                        <p class="text-sm text-slate-800">Hello! How can I help you today?</p>
-                    </div>
+        </div>
+        <div id="chat-popup-history">
+             <div class="ai-bubble">
+                <p>Hello! I am your AI Farming Assistant. Ask me anything about your crops, weather, or market prices.</p>
+            </div>
+        </div>
+        <div id="ai-chat-container">
+            <div class="glow"></div>
+            <div class="darkBorderBg"></div>
+            <div class="darkBorderBg"></div>
+            <div class="darkBorderBg"></div>
+            <div class="white"></div>
+            <div class="border"></div>
+            <div id="main">
+                <input placeholder="Ask me anything..." type="text" name="text" class="input" id="ai-chat-input"/>
+                <div id="input-mask"></div>
+                <div id="pink-mask"></div>
+                <div class="filterBorder"></div>
+                <div id="filter-icon">
+                    <svg preserveAspectRatio="none" height="27" width="27" viewBox="4.8 4.56 14.832 15.408" fill="none" >
+                        <path d="M8.16 6.65002H15.83C16.47 6.65002 16.99 7.17002 16.99 7.81002V9.09002C16.99 9.56002 16.7 10.14 16.41 10.43L13.91 12.64C13.56 12.93 13.33 13.51 13.33 13.98V16.48C13.33 16.83 13.1 17.29 12.81 17.47L12 17.98C11.24 18.45 10.2 17.92 10.2 16.99V13.91C10.2 13.5 9.97 12.98 9.73 12.69L7.52 10.36C7.23 10.08 7 9.55002 7 9.20002V7.87002C7 7.17002 7.52 6.65002 8.16 6.65002Z" stroke="#d6d6e6" stroke-width="1" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" ></path>
+                    </svg>
+                </div>
+                <div id="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" height="24" fill="none" class="feather feather-search">
+                        <circle stroke="url(#search)" r="8" cy="11" cx="11"></circle>
+                        <line stroke="url(#searchl)" y2="16.65" y1="22" x2="16.65" x1="22" ></line>
+                        <defs>
+                            <linearGradient gradientTransform="rotate(50)" id="search">
+                            <stop stop-color="#f8e7f8" offset="0%"></stop>
+                            <stop stop-color="#b6a9b7" offset="50%"></stop>
+                            </linearGradient>
+                            <linearGradient id="searchl">
+                            <stop stop-color="#b6a9b7" offset="0%"></stop>
+                            <stop stop-color="#837484" offset="50%"></stop>
+                            </linearGradient>
+                        </defs>
+                    </svg>
                 </div>
             </div>
-            <div class="p-3 border-t border-slate-200 flex">
-                <input type="text" id="chat-input" placeholder="Ask me anything..." class="w-full border-slate-300 rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
-                <button id="chat-send" class="ml-2 bg-emerald-600 text-white px-4 rounded-lg hover:bg-emerald-700"><i class="ph-bold ph-paper-plane-tilt"></i></button>
-            </div>
         </div>
-        <button id="chat-toggle" class="bg-amber-500 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-amber-600 transition-transform hover:scale-110 mt-4">
-            <i class="ph-fill ph-chat-circle-dots"></i>
-        </button>
     </div>
 
+    <!-- Floating Action Buttons Container -->
+    <div id="fab-container" class="fixed bottom-6 right-6 z-50 hidden">
+        <div class="relative flex flex-col items-center space-y-4">
+            <!-- Quick Actions Menu (Popping up above the button) -->
+            <div id="quick-actions-menu" class="flex flex-col items-end space-y-2 mb-2 hidden">
+                <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="log">
+                    <i class="ph-bold ph-clipboard-text text-xl text-emerald-600"></i>
+                    <span class="ml-3 font-semibold">Log Activity</span>
+                </button>
+                <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="upload">
+                    <i class="ph-bold ph-camera text-xl text-emerald-600"></i>
+                    <span class="ml-3 font-semibold">Upload Photo</span>
+                </button>
+                <button class="quick-action-item bg-white text-slate-700 w-52 text-left p-3 rounded-lg shadow-xl flex items-center hover:bg-slate-100 transition-all" data-action="community">
+                    <i class="ph-bold ph-chats-circle text-xl text-emerald-600"></i>
+                    <span class="ml-3 font-semibold">Ask Community</span>
+                </button>
+            </div>
+            
+            <!-- Chat Toggle Button -->
+            <button id="chat-toggle-btn" class="bg-amber-500 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-amber-600 transition-transform hover:scale-110">
+                <i class="ph-fill ph-chat-circle-dots"></i>
+            </button>
+    
+            <!-- Quick Actions Toggle Button -->
+            <button id="quick-actions-toggle" class="bg-emerald-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-4xl hover:bg-emerald-700 transition-all hover:scale-110">
+                <i class="ph-bold ph-plus"></i>
+            </button>
+        </div>
+    </div>
+    
     <!-- Log Activity Modal -->
-    <div id="log-activity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-[100]">
+    <div id="log-activity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-[120]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
             <h3 class="text-2xl font-bold text-slate-800 mb-4">Log Farm Activity</h3>
             <p class="text-slate-600 mb-6">Keep your records updated for better AI advice.</p>
@@ -513,7 +803,7 @@
     </div>
 
     <!-- Scheme Details Modal -->
-    <div id="scheme-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[100]">
+    <div id="scheme-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[140]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center">
                  <h3 id="modal-scheme-title" class="text-3xl font-bold text-slate-800"></h3>
@@ -521,7 +811,7 @@
                     <i class="ph-bold ph-x-circle"></i>
                  </button>
             </div>
-           
+            
             <div class="mt-6">
                 <h4 class="font-semibold text-lg text-slate-700">Scheme Details</h4>
                 <p id="modal-scheme-description" class="text-slate-600 mt-2"></p>
@@ -547,7 +837,7 @@
     </div>
 
     <!-- Log Transaction Modal -->
-    <div id="log-transaction-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[100]">
+    <div id="log-transaction-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[130]">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-2xl font-bold text-slate-800">Log a Transaction</h3>
@@ -587,6 +877,27 @@
                     <button type="submit" class="bg-emerald-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-emerald-700">Save Transaction</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Knowledge Hub Details Modal -->
+    <div id="knowledge-details-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-[145]">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                 <h3 id="modal-knowledge-title" class="text-3xl font-bold text-slate-800"></h3>
+                 <button id="modal-knowledge-close" class="text-slate-500 hover:text-slate-800 text-2xl">
+                    <i class="ph-bold ph-x-circle"></i>
+                 </button>
+            </div>
+            
+            <div id="modal-knowledge-content" class="text-slate-600 mt-4 prose prose-emerald max-w-none">
+                <!-- Detailed content will be injected here -->
+            </div>
+
+            <div id="modal-knowledge-youtube-container" class="mt-6 space-y-4">
+                 <h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Videos</h4>
+                 <!-- YouTube videos will be injected here -->
+            </div>
         </div>
     </div>
 
@@ -632,6 +943,7 @@
             signupFlow.classList.add('hidden');
             mainApp.classList.remove('hidden');
             mainApp.style.animation = 'fadeIn 0.5s ease-in-out';
+            document.getElementById('fab-container').classList.remove('hidden'); // Show FABs
             updateDashboardGreeting();
         }
 
@@ -680,6 +992,7 @@
         // --- MOCK DATA ---
         const MOCK_DATA = {
             weather: {
+                current: { temp: 29, humidity: 85, condition: 'Partly Cloudy', icon: 'ph-fill ph-cloud-sun' },
                 forecast: [
                     { day: 'Today', icon: 'ph-fill ph-cloud-sun', high: 29, low: 24 },
                     { day: 'Mon', icon: 'ph-fill ph-cloud-rain', high: 28, low: 23 },
@@ -841,26 +1154,215 @@
                 { name: 'South Coconut Traders', location: 'Alappuzha', interestedIn: ['Coconut', 'Copra'], rating: 4.7 },
             ],
             knowledgeArticles: [
-                { title: 'Advanced Irrigation Techniques for Paddy Fields', category: 'Water Management', readTime: '8 min' },
-                { title: 'Organic Pest Control for Common Vegetables', category: 'Pest Control', readTime: '12 min' },
-                { title: 'Understanding Soil Health and Nutrients', category: 'Soil Health', readTime: '15 min' },
+                { 
+                    title: 'Advanced Irrigation Techniques for Paddy Fields', 
+                    category: 'Water Management', 
+                    readTime: '8 min',
+                    modalTitle: 'Advanced Irrigation Techniques for Paddy Fields',
+                    detailedContent: `
+                        <p class="text-slate-600 mt-2">Paddy (rice) cultivation traditionally relies on continuous flooding, which leads to large water use, inefficiencies, and greenhouse gas emissions. Advanced irrigation strategies aim to optimize water use, improve yields, and reduce environmental impacts.</p>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Key Techniques & Innovations</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-300 mt-2">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Technique</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">How It Works</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Benefits & Challenges</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white">
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Alternate Wetting and Drying (AWD)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Instead of keeping fields continuously flooded, allow soil to dry to a threshold, then re-flood.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Can reduce water use by ~20–25% with minimal yield loss; also lowers methane emissions. However, timing is sensitive — too much drying stresses plants.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Drip or Subsurface Drip Irrigation (SDI)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Delivering water directly to the root zone via buried or surface drip lines.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Very high water efficiency, reduced evaporation. But difficult to implement in flooded fields; cost and clogging are challenges.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Conversion of open channels to closed conduits / piped systems</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Instead of open earthen canals, use sealed pipes or channels to reduce seepage and evaporation losses.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">In a study, converting open channels improved irrigation efficiency by ~5.4%.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Smart / sensor-driven scheduling</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Use soil moisture sensors, weather data, or AI models to decide when and how much to irrigate.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Can optimize water use while avoiding stress or overwatering. Needs investment in sensors, automation, connectivity.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Direct Seeded Rice (DSR)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Seed rice directly rather than transplanting seedlings. This reduces the need for constant flooding in early stages.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Saves labor and water, reduces methane emissions in early period. However, weed control becomes more challenging.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Practical Tips to Apply in Paddy Fields</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li>Use perforated PVC “observation tubes” to monitor subsurface water levels and decide when to re-flood.</li>
+                            <li>Avoid letting the soil dry beyond critical thresholds (especially during vegetative or reproductive stages).</li>
+                            <li>Combine infrastructural improvements (e.g. lined canals, pipelines) with scheduling and sensor-based control to maximize efficiency.</li>
+                            <li>In areas of high rainfall, AWD may not be feasible because soils rarely dry enough.</li>
+                            <li>Perform pilot testing in parts of your field before converting the whole area.</li>
+                        </ul>
+                    `,
+                    youtubeLinks: [
+                        'https://www.youtube.com/embed/0qu2T7JaVDw',
+                        'https://www.youtube.com/embed/Br5c3ZZ_kuc',
+                        'https://www.youtube.com/embed/IvlkZBiaDBg'
+                    ]
+                },
+                { 
+                    title: 'Organic Pest Control for Common Vegetables', 
+                    category: 'Pest Control', 
+                    readTime: '12 min',
+                    modalTitle: 'Organic Pest Control for Common Vegetables',
+                    detailedContent: `
+                        <p class="text-slate-600 mt-2">Conventional chemical pesticides can harm beneficial insects, degrade soil health, and leave residues. Organic (or biocontrol-based) management emphasizes ecological balance and prevention.</p>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Core Strategies</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li><strong>Cultural & Preventive Measures:</strong> Crop rotation, intercropping, and trap crops to break pest cycles. Use pest-resistant vegetable varieties. Maintain healthy soil — plants under stress are more susceptible to pests. Sanitation: remove infested plant debris, weeds, etc.</li>
+                            <li><strong>Biological Controls & Beneficial Organisms:</strong> Introduce or attract beneficial insects (ladybugs, predatory wasps, lacewings) that prey on pests. Use microbial biopesticides — Bacillus thuringiensis (Bt), beneficial fungi (Trichoderma), etc. Use nematode-suppressing amendments or biocontrol nematodes. Use organic matter (compost, vermicompost) to boost soil organisms that compete with or antagonize pests.</li>
+                            <li><strong>Physical & Mechanical Methods:</strong> Insect traps (pheromone traps, sticky traps) to monitor or reduce pest populations. Row covers, nets, barriers to block pests. Manual removal (handpicking eggs, larvae). Use of trap crops (plants that attract pests away from your main crop).</li>
+                            <li><strong>Botanical & Organic Pesticides (as last resort):</strong> Neem oil, kaolin clay, pyrethrin (when allowed) — use carefully to minimize negative effects on beneficials. Use lower-risk substances around sensitive stages. Always follow organic-certification rules and safe application methods.</li>
+                        </ul>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Best Practices & Tips</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li>Regular scouting is critical: detect pests early before populations explode.</li>
+                            <li>Keep good records of pest outbreaks, weather, and control measures to refine strategies over time.</li>
+                            <li>Combine multiple methods (an integrated approach), rather than relying on one method alone.</li>
+                            <li>Be conservative with interventions — maintain balance so beneficial organisms can thrive.</li>
+                            <li>When applying botanical/pesticide sprays, do so at times least harmful to pollinators (early morning, evening).</li>
+                        </ul>
+                    `,
+                    youtubeLinks: [
+                        'https://www.youtube.com/embed/4dwOwXZ9r08',
+                        'https://www.youtube.com/embed/dk1BCU1kAOA',
+                        'https://www.youtube.com/embed/E2O_YOqOIZw',
+                        'https://www.youtube.com/embed/7s0NzXP5Kp4'
+                    ]
+                },
+                { 
+                    title: 'Understanding Soil Health and Nutrients', 
+                    category: 'Soil Health', 
+                    readTime: '15 min',
+                    modalTitle: 'Understanding Soil Health and Nutrients',
+                    detailedContent: `
+                        <p class="text-slate-600 mt-2">Soil health refers to the capacity of soil to function as a living ecosystem that sustains plants, animals, and humans. It involves the physical structure, chemical fertility, and biological activity of soil.</p>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Key Components of Soil Health</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li><strong>Soil organic matter (SOM):</strong> The decomposed plant/animal residue. It feeds microbes, improves structure, and holds moisture.</li>
+                            <li><strong>Soil structure & porosity:</strong> Good aggregation allows air and water movement, root penetration, and reduces compaction.</li>
+                            <li><strong>Biological life / microbial activity:</strong> Bacteria, fungi, earthworms, macro- and micro-organisms help cycle nutrients, suppress disease, and improve soil resilience.</li>
+                            <li><strong>Chemical fertility / nutrient availability:</strong> Balanced levels of N, P, K, micronutrients (e.g. Zn, Fe, Mn) in plant-available forms.</li>
+                            <li><strong>pH, salinity, cation exchange capacity (CEC):</strong> These govern how nutrients are held, released, or locked up.</li>
+                        </ul>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">How Soil Health Affects Crop Nutrition</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li>Soils rich in organic matter and microbial activity often produce crops with higher micronutrient concentrations.</li>
+                            <li>Overuse of synthetic fertilizers and frequent tillage can disrupt soil life, reduce organic matter, and reduce long-term fertility.</li>
+                            <li>Healthy soils help buffer stress (e.g. drought, pests), giving plants resilience.</li>
+                            <li>Soils with good structure reduce erosion, nutrient leaching, and maintain stability.</li>
+                        </ul>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Managing Nutrients — Best Practices</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-300 mt-2">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Nutrient</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Source Strategies</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Tips & Caveats</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white">
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Nitrogen (N)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Use organic sources: compost, green manures, biofertilizers. Legume rotations fix N.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Apply in split doses. Avoid overapplication which causes leaching.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Phosphorus (P) & Potassium (K)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Use rock phosphate, compost, biochar, wood ash.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Check soil test; excess P can cause environmental issues.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Micronutrients (Zn, Fe, Mn, etc.)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Use chelated formulations, foliar sprays, or soil amendments like zinc sulfate.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Micronutrient deficiency often shows in leaves (chlorosis, stunting).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Organic matter</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Regular addition of compost, mulch, cover crops.</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">Maintain 2–5% SOM (or more) depending on climate and cropping.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-4">Practices That Build Soil Health</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                            <li>No-till or reduced tillage: Protects soil structure and microbial habitat.</li>
+                            <li>Cover crops / green manures: Provide continuous living roots, reduce erosion, fix N.</li>
+                            <li>Crop rotation & diversity: Break pest/disease cycles, distribute nutrient demands.</li>
+                            <li>Composting / organic amendments: Add humus, feed soil life.</li>
+                            <li>Avoiding heavy chemical overuse: Preserve microbial diversity and soil enzyme functions.</li>
+                            <li>Mulching: Retains moisture, moderates temperature, reduces erosion.</li>
+                        </ul>
+                    `,
+                    youtubeLinks: [
+                        'https://www.youtube.com/embed/videoseries?list=PL2hN8vwJse8tKzpma_8Z8XKRsFkCNENPh' 
+                    ]
+                }
             ]
         };
 
         let financialsChart = null;
         let expenseChart = null;
+        
+        // --- RENDER FUNCTIONS & API CALLS ---
 
-        // --- RENDER FUNCTIONS ---
-        function renderWeatherForecast() {
-            const container = document.querySelector('#dashboard .grid.grid-cols-5');
-            container.innerHTML = MOCK_DATA.weather.forecast.map(item => `
-                <div class="text-center">
-                    <p class="font-semibold">${item.day}</p>
-                    <i class="${item.icon} text-4xl my-2"></i>
-                    <p class="text-sm">${item.high}°/${item.low}°</p>
+        function updateWeatherWidget(data) {
+            const container = document.getElementById('weather-card');
+            container.innerHTML = `
+                <h3 class="font-bold text-lg mb-4 opacity-90">Weather Updates</h3>
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm opacity-80">${data.location}</p>
+                        <p class="text-6xl font-extrabold">${Math.round(data.current.temp)}°C</p>
+                        <p class="font-semibold">Humidity: ${data.current.humidity}%</p>
+                    </div>
+                    <i class="${data.current.icon} text-8xl opacity-80"></i>
                 </div>
-            `).join('');
+                <div class="mt-6 grid grid-cols-5 gap-2 text-center">
+                    ${data.forecast.map(day => `
+                        <div class="text-center">
+                            <p class="font-semibold">${day.day}</p>
+                            <i class="${day.icon} text-4xl my-2"></i>
+                            <p class="text-sm">${Math.round(day.high)}°/${Math.round(day.low)}°</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
+        
+        async function fetchWeatherData() {
+            const weatherCard = document.getElementById('weather-card');
+            weatherCard.innerHTML = `<div class="text-center p-10"><div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div><p class="text-white mt-2">Loading Weather...</p></div>`;
+
+            // This is a simulated API call. In a real application, you would use fetch() to an actual weather API.
+            // Using a timeout to simulate network latency.
+            setTimeout(() => {
+                const liveData = {
+                    location: "Thrissur, Kerala",
+                    current: MOCK_DATA.weather.current,
+                    forecast: MOCK_DATA.weather.forecast
+                };
+                updateWeatherWidget(liveData);
+            }, 1500);
+        }
+
 
         function renderFarmConditions() {
             const container = document.getElementById('farm-conditions-container');
@@ -1063,7 +1565,7 @@
                      <h3 class="text-2xl font-bold text-emerald-700">${item.title}</h3>
                      <p class="text-slate-600 mt-2">${item.description}</p>
                      <ul class="list-disc list-inside mt-4 space-y-1 text-slate-500">
-                        ${item.details.map(detail => `<li>${detail}</li>`).join('')}
+                         ${item.details.map(detail => `<li>${detail}</li>`).join('')}
                      </ul>
                 </div>
             `).join('');
@@ -1094,7 +1596,7 @@
         
         function renderKnowledgeHub() {
              const container = document.getElementById('articles-list');
-             container.innerHTML = MOCK_DATA.knowledgeArticles.map(article => `
+             container.innerHTML = MOCK_DATA.knowledgeArticles.map((article, index) => `
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
                     <div class="bg-gradient-to-r from-amber-400 to-yellow-400 h-28"></div>
                     <div class="p-6">
@@ -1102,7 +1604,7 @@
                         <h3 class="font-bold text-slate-800 text-lg mt-2">${article.title}</h3>
                         <div class="flex justify-between items-center mt-4 text-sm text-slate-500">
                             <span>${article.readTime} read</span>
-                            <a href="#" class="font-semibold text-emerald-600 hover:underline">Read More <i class="ph-bold ph-arrow-right"></i></a>
+                            <button class="learn-more-knowledge-btn font-semibold text-emerald-600 hover:underline" data-knowledge-id="${index}">Read More <i class="ph-bold ph-arrow-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -1277,40 +1779,92 @@ ${reportData.organicAlternatives}
         downloadReportBtn.addEventListener('click', downloadReport);
 
 
-        // --- QUICK ACTIONS ---
-        const qaToggle = document.getElementById('quick-actions-toggle');
-        const qaMenu = document.getElementById('quick-actions-menu');
-        const qaItems = document.querySelectorAll('.quick-action-item');
-        const logModal = document.getElementById('log-activity-modal');
+        // --- AI CHAT POPUP ---
+        const chatPopup = document.getElementById('chat-popup');
+        const chatToggleBtn = document.getElementById('chat-toggle-btn');
+        const expandChatBtn = document.getElementById('expand-chat-btn');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const aiChatInput = document.getElementById('ai-chat-input');
+        const aiChatSendBtn = document.getElementById('search-icon');
+        const aiChatHistory = document.getElementById('chat-popup-history');
 
-        qaToggle.addEventListener('click', () => {
-            qaMenu.classList.toggle('hidden');
-            qaToggle.classList.toggle('rotate-45');
+        chatToggleBtn.addEventListener('click', () => {
+            chatPopup.classList.toggle('active');
         });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatPopup.classList.remove('active');
+        });
+
+        expandChatBtn.addEventListener('click', () => {
+            chatPopup.classList.toggle('expanded');
+        });
+
+        function addAiChatMessage(text, sender) {
+            const bubble = document.createElement('div');
+            bubble.classList.add(sender === 'user' ? 'user-bubble' : 'ai-bubble');
+            const p = document.createElement('p');
+            p.textContent = text;
+            bubble.appendChild(p);
+            aiChatHistory.appendChild(bubble);
+            aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'ai-bubble typing-indicator';
+            indicator.innerHTML = '<span></span><span></span><span></span>';
+            aiChatHistory.appendChild(indicator);
+            aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = aiChatHistory.querySelector('.typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
         
-        qaItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const action = item.dataset.action;
-                if (action === 'log') {
-                    logModal.classList.remove('hidden');
-                } else if (action === 'upload') {
-                    window.location.hash = '#pest-detection';
-                } else if (action === 'community') {
-                    window.location.hash = '#community';
-                }
-                qaMenu.classList.add('hidden');
-                qaToggle.classList.remove('rotate-45');
-            });
-        });
+        function getAiResponse(message) {
+            const lowerCaseMessage = message.toLowerCase();
+            if (lowerCaseMessage.includes('weather')) {
+                const weather = MOCK_DATA.weather.current;
+                return `The current weather in Thrissur is ${weather.temp}°C with ${weather.humidity}% humidity. It's currently ${weather.condition}.`;
+            } else if (lowerCaseMessage.includes('market') || lowerCaseMessage.includes('price')) {
+                const prices = MOCK_DATA.marketPrices.map(item => `${item.name} at ${item.price}`).join(', ');
+                return `Today's market prices are: ${prices}.`;
+            } else if (lowerCaseMessage.includes('fertilizer')) {
+                return "For coconut crops at this stage, an NPK ratio of 10-5-20 is recommended. Would you like me to show you some organic options?";
+            } else if (lowerCaseMessage.includes('pest') || lowerCaseMessage.includes('disease')) {
+                return "I can help with that. Please go to the 'Pest Detection' section and upload a photo of the affected plant for an AI analysis.";
+            } else if (lowerCaseMessage.includes('hello') || lowerCaseMessage.includes('hi')) {
+                return "Hello! How can I assist you with your farming today?";
+            }
+            
+            return "I'm sorry, I can only provide information about weather, market prices, fertilizer, and pests right now. Please try asking one of those topics.";
+        }
 
-        // --- MODAL ---
-        document.getElementById('modal-cancel').addEventListener('click', () => logModal.classList.add('hidden'));
-        document.getElementById('modal-save').addEventListener('click', () => {
-            // Logic to save activity would go here
-            console.log('Activity logged:', document.getElementById('activity-log-input').value);
-            document.getElementById('activity-log-input').value = '';
-            logModal.classList.add('hidden');
-            // Show a success message if needed
+
+        function handleAiChatMessageSend() {
+            const userMessage = aiChatInput.value.trim();
+            if (userMessage) {
+                addAiChatMessage(userMessage, 'user');
+                aiChatInput.value = '';
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const aiResponse = getAiResponse(userMessage);
+                    addAiChatMessage(aiResponse, 'ai');
+                }, 1500 + Math.random() * 500); // simulate thinking
+            }
+        }
+
+        aiChatSendBtn.addEventListener('click', handleAiChatMessageSend);
+        aiChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleAiChatMessageSend();
+            }
         });
         
         // --- SCHEME DETAILS MODAL ---
@@ -1366,12 +1920,90 @@ ${reportData.organicAlternatives}
             }
         });
         
-        // --- TRANSACTION MODAL ---
+        // --- KNOWLEDGE HUB DETAILS MODAL ---
+        const knowledgeModal = document.getElementById('knowledge-details-modal');
+        const articlesListContainer = document.getElementById('articles-list');
+
+        function openKnowledgeModal(articleData) {
+            document.getElementById('modal-knowledge-title').textContent = articleData.modalTitle;
+            document.getElementById('modal-knowledge-content').innerHTML = articleData.detailedContent;
+            
+            const youtubeContainer = document.getElementById('modal-knowledge-youtube-container');
+            youtubeContainer.innerHTML = '<h4 class="font-semibold text-lg text-slate-700 mb-2">Helpful Videos</h4>'; // Reset container
+            
+            if (articleData.youtubeLinks && articleData.youtubeLinks.length > 0) {
+                articleData.youtubeLinks.forEach(link => {
+                    const videoIdMatch = link.match(/(?:embed\/|v=|vi=|youtu\.be\/|videoseries\?list=)([^?&]+)/);
+                    if(videoIdMatch && videoIdMatch[1]){
+                        const videoId = videoIdMatch[1].startsWith('videoseries') ? videoIdMatch[1].split('=')[1] : videoIdMatch[1];
+                        const facade = document.createElement('div');
+                        facade.className = 'video-facade';
+                        facade.style.backgroundImage = `url(https://img.youtube.com/vi/${videoId}/hqdefault.jpg)`;
+                        facade.dataset.embedUrl = link;
+                        youtubeContainer.appendChild(facade);
+                    }
+                });
+                youtubeContainer.classList.remove('hidden');
+            } else {
+                youtubeContainer.classList.add('hidden');
+            }
+
+            knowledgeModal.classList.remove('hidden');
+        }
+
+        function closeKnowledgeModal() {
+            knowledgeModal.classList.add('hidden');
+             // Remove iframes to stop video playback
+            const youtubeContainer = document.getElementById('modal-knowledge-youtube-container');
+            youtubeContainer.innerHTML = '';
+        }
+        
+        document.getElementById('modal-knowledge-youtube-container').addEventListener('click', function(e){
+            const facade = e.target.closest('.video-facade');
+            if(facade){
+                const embedUrl = facade.dataset.embedUrl;
+                const iframe = document.createElement('iframe');
+                iframe.className = 'w-full aspect-video rounded-lg';
+                iframe.src = embedUrl + '?autoplay=1';
+                iframe.title = "YouTube video player";
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('allow', 'accelerometer; autoplay=1; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+                iframe.setAttribute('allowfullscreen', '');
+                facade.replaceWith(iframe);
+            }
+        });
+
+
+        articlesListContainer.addEventListener('click', function(e) {
+            const learnMoreButton = e.target.closest('.learn-more-knowledge-btn');
+            if (learnMoreButton) {
+                const knowledgeId = learnMoreButton.getAttribute('data-knowledge-id');
+                const articleData = MOCK_DATA.knowledgeArticles[knowledgeId];
+                if (articleData) {
+                    openKnowledgeModal(articleData);
+                }
+            }
+        });
+
+        document.getElementById('modal-knowledge-close').addEventListener('click', closeKnowledgeModal);
+
+        knowledgeModal.addEventListener('click', function(e) {
+            if (e.target === knowledgeModal) {
+                closeKnowledgeModal();
+            }
+        });
+
+        // --- TRANSACTION MODAL & Log Activity Modal & Quick Actions ---
         const logTransactionBtn = document.getElementById('log-transaction-btn');
         const transactionModal = document.getElementById('log-transaction-modal');
         const closeTransactionModalBtn = document.getElementById('close-transaction-modal');
         const transactionForm = document.getElementById('transaction-form');
         const categoryWrapper = document.getElementById('category-wrapper');
+        const logModal = document.getElementById('log-activity-modal');
+        const qaToggle = document.getElementById('quick-actions-toggle');
+        const qaMenu = document.getElementById('quick-actions-menu');
+        const qaItems = document.querySelectorAll('.quick-action-item');
+
 
         logTransactionBtn.addEventListener('click', () => transactionModal.classList.remove('hidden'));
         closeTransactionModalBtn.addEventListener('click', () => transactionModal.classList.add('hidden'));
@@ -1379,6 +2011,13 @@ ${reportData.organicAlternatives}
             if (e.target === transactionModal) {
                 transactionModal.classList.add('hidden');
             }
+        });
+        
+        document.getElementById('modal-cancel').addEventListener('click', () => logModal.classList.add('hidden'));
+        document.getElementById('modal-save').addEventListener('click', () => {
+            console.log('Activity logged:', document.getElementById('activity-log-input').value);
+            document.getElementById('activity-log-input').value = '';
+            logModal.classList.add('hidden');
         });
 
         transactionForm.addEventListener('change', (e) => {
@@ -1407,62 +2046,42 @@ ${reportData.organicAlternatives}
             showToast('Transaction logged successfully!');
         });
 
-
-        // --- CHATBOT ---
-        const chatToggle = document.getElementById('chat-toggle');
-        const chatWindow = document.getElementById('chat-window');
-        const chatInput = document.getElementById('chat-input');
-        const chatSend = document.getElementById('chat-send');
-        const chatHistory = document.getElementById('chat-history');
-
-        chatToggle.addEventListener('click', () => {
-            chatWindow.classList.toggle('hidden');
+        qaToggle.addEventListener('click', () => {
+            qaMenu.classList.toggle('hidden');
+            const icon = qaToggle.querySelector('i');
+            if (icon.classList.contains('ph-plus')) {
+                icon.classList.remove('ph-plus');
+                icon.classList.add('ph-x');
+                qaToggle.classList.add('rotate-45');
+            } else {
+                icon.classList.remove('ph-x');
+                icon.classList.add('ph-plus');
+                qaToggle.classList.remove('rotate-45');
+            }
         });
 
-        function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'p-3 rounded-lg chat-bubble';
-
-            if (sender === 'user') {
-                messageDiv.classList.add('justify-end');
-                bubble.classList.add('bg-emerald-600', 'text-white');
-            } else {
-                bubble.classList.add('bg-slate-200');
-            }
-
-            const p = document.createElement('p');
-            p.className = 'text-sm';
-            p.textContent = text;
-
-            bubble.appendChild(p);
-            messageDiv.appendChild(bubble);
-            chatHistory.appendChild(messageDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        function handleSendMessage() {
-            const userMessage = chatInput.value.trim();
-            if (userMessage) {
-                addMessage(userMessage, 'user');
-                chatInput.value = '';
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    const aiResponse = "Considering your soil data and the current growth stage, a fertilizer with a higher potassium ratio (NPK 6-6-12) is recommended. Would you like to see a list of products?";
-                    addMessage(aiResponse, 'ai');
-                }, 1500);
-            }
+        function closeQuickActionsMenu() {
+            qaMenu.classList.add('hidden');
+            const icon = qaToggle.querySelector('i');
+            icon.classList.remove('ph-x');
+            icon.classList.add('ph-plus');
+            qaToggle.classList.remove('rotate-45');
         }
         
-        chatSend.addEventListener('click', handleSendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSendMessage();
-            }
+        qaItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                if (action === 'log') {
+                    logModal.classList.remove('hidden');
+                } else if (action === 'upload') {
+                    window.location.hash = '#pest-detection';
+                } else if (action === 'community') {
+                    window.location.hash = '#community';
+                }
+                closeQuickActionsMenu();
+            });
         });
+
 
         // --- LOGOUT ---
         const logoutBtn = document.getElementById('logout-btn');
@@ -1478,6 +2097,7 @@ ${reportData.organicAlternatives}
 
                 mainApp.classList.add('hidden');
                 signupFlow.classList.remove('hidden');
+                document.getElementById('fab-container').classList.add('hidden'); // Hide FABs
                 showPhase(1);
                 window.location.hash = '';
             }, 1500);
@@ -1486,7 +2106,7 @@ ${reportData.organicAlternatives}
 
         // --- INITIALIZE APP ---
         function init() {
-            renderWeatherForecast();
+            fetchWeatherData();
             renderFarmConditions();
             renderYieldPrediction();
             renderMarketPrices();
